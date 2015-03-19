@@ -104,10 +104,11 @@ end
 function LoadingScene:addLoadingText(layer)
     local ttfconfig = {outlineSize=5,fontSize=55,fontFilePath="chooseRole/actor_param.ttf"}
     local loading = {}
-    for i,v in pairs({"l","o","a","d","i","n","g"}) do
+    
+    for i,v in pairs({"C","o","c","o","s"," ","D", "e", "m", "o"}) do
         loading[i] = cc.Label:createWithTTF(ttfconfig,v)
         loading[i]:enableOutline(cc.c4b(104,151,161,255))
-        loading[i]:setPosition(self.size.width*0.13+self.size.width*0.1*i,self.size.height*0.6)
+        loading[i]:setPosition(self.size.width*0.13+self.size.width*0.08*i,self.size.height*0.6)
         layer:addChild(loading[i])
     end
     self._loading = loading
