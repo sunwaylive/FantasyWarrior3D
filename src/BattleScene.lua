@@ -171,6 +171,7 @@ end
 
 function BattleScene.create()
     local scene = BattleScene:new()
+    --wei add, heros and monsters are both on currentLayer
     currentLayer = cc.Layer:create()
     currentLayer:setCascadeColorEnabled(true)
     scene:addChild(currentLayer)

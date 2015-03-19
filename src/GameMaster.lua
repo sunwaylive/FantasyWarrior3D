@@ -152,6 +152,7 @@ function GameMaster:logicUpdate()
     end
 end
 
+--add heros
 function GameMaster:AddHeros()
 
 	local knight = Knight:create()
@@ -160,19 +161,22 @@ function GameMaster:AddHeros()
     knight:idleMode()
     List.pushlast(HeroManager, knight)
 
-	local mage = Mage:create()
-   	mage:setPosition(battleSiteX[1], 100)
+    local mage = Mage:create()
+   	mage:setPosition(battleSiteX[1], 100)--wei add.100
    	currentLayer:addChild(mage)
    	mage:idleMode()
+    mage:setVisible(false)--wei add
    	List.pushlast(HeroManager, mage)
    	
     local archer = Archer:create()
-    archer:setPosition(battleSiteX[1], -80)
+    archer:setPosition(battleSiteX[1], -80)--wei add. -80
     currentLayer:addChild(archer)
     archer:idleMode()
+    archer:setVisible(false)--wei add
     List.pushlast(HeroManager, archer)
 end
 
+--add monsters
 function GameMaster:addMonsters()
 	self:addDragon()
 	self:addSlime()
