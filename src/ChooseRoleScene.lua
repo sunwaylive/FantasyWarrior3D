@@ -75,10 +75,11 @@ function ChooseRoleScene:addBag()
     return bag
 end
 
+--这个是三个英雄下面的按钮，点击进入游戏场景
 function ChooseRoleScene:addButton()
     --button
     local touch_next = false
-
+    --ReSkin 记录了装备穿戴情况
     local function touchEvent_next(sender,eventType)
         if touch_next == false then
             touch_next = true
@@ -96,12 +97,14 @@ function ChooseRoleScene:addButton()
                 local playid = ccexp.AudioEngine:play2d(BGM_RES.MAINMENUSTART,false,1)
                 --stop schedule
                 cc.Director:getInstance():getScheduler():unscheduleScriptEntry(self._schedule_rotate)
-                --replace scene
+                
+                --replace scene， 跳转之前清空对象
                 package.loaded["BattleScene"]=nil
                 package.loaded["Manager"]=nil
                 package.loaded["Helper"]=nil
                 package.loaded["MessageDispatchCenter"]=nil
                 package.loaded["BattleFieldUI"]=nil
+                --进入战斗场景
                 local scene = require("BattleScene")
                 cc.Director:getInstance():replaceScene(scene.create())
             end
@@ -110,8 +113,10 @@ function ChooseRoleScene:addButton()
 
     local next_Button = ccui.Button:create("button1.png","button2.png","",ccui.TextureResType.plistType)
     next_Button:setTouchEnabled(true)
-    next_Button:setNormalizedPosition({x=0.34,y=0.13})
+    --设置button的位置
+    next_Button:setNormalizedPosition({x=0.34,y=0.13})-- Node的位置像素会根据它的父节点的尺寸大小计算，即按比例
     next_Button:setScale(resolutionRate)
+    
     next_Button:addTouchEventListener(touchEvent_next)        
     self.layer:addChild(next_Button)
 end
@@ -141,12 +146,14 @@ function ChooseRoleScene:addHeros()
     mage:setScale(1.3)
     self.layer:addChild(mage)
     
-    --hero rotate
+    --hero rotate, 旋转英雄
+    --setRotation3D，开启一个schedule每次旋转了0.5个弧度
     local rotate = 0.5
     local function hero_rotate()
         local rotation = self.layer:getChildByTag(sortorder[2]):getRotation3D()
-        self.layer:getChildByTag(sortorder[2]):setRotation3D({x=rotation.x,y=rotation.y+rotate,z=0})
+        self.layer:getChildByTag(sortorder[2]):setRotation3D({x = rotation.x, y = rotation.y + rotate, z=0})
     end
+    --设置调度器每帧都执行
     self._schedule_rotate = cc.Director:getInstance():getScheduler():scheduleScriptFunc(hero_rotate,0,false)
 end
 
@@ -251,7 +258,7 @@ function ChooseRoleScene:initTouchDispatcher()
         end
     end,cc.Handler.EVENT_TOUCH_MOVED )
     
-    --松开手之后
+    --松开手之后, 设置一些bool变量，替换装备等等
     listenner:registerScriptHandler(function(touch, event)
         if isRotateavaliable then --rotate
             isRotateavaliable = false
@@ -262,7 +269,7 @@ function ChooseRoleScene:initTouchDispatcher()
             self._weaponItem:setOpacity(255) --255 完全不透明
             --根据选中的武器，替换装备
             self.layer:getChildByTag(sortorder[2]):switchWeapon()
-            self._weaponItem:setSpriteFrame(self:getWeaponTextureName())
+            self._weaponItem:setSpriteFrame(self:getWeaponTextureName())--得到另外一种武器纹理
         elseif isArmourItemavaliable then
             isArmourItemavaliable = false
             self._armourItem:setPosition(armour_item_pos)
@@ -282,13 +289,15 @@ function ChooseRoleScene:initTouchDispatcher()
         end
     end,cc.Handler.EVENT_TOUCH_ENDED )
     
-    --注册监听事件
+    --注册监听事件，在所在的层上面响应拖动事件
     local eventDispatcher = self.layer:getEventDispatcher()
     eventDispatcher:addEventListenerWithSceneGraphPriority(listenner, self.layer)
 end
 
+--当鼠标拖动大于50的时候，旋转英雄
 function ChooseRoleScene:rotate3Heroes(isRight)
     --stop hero rotate
+    --从左向右依次为1 2 3
     if isRight then
         self.layer:getChildByTag(sortorder[2]):runAction(cc.RotateTo:create(0.1,rtt[3]))
     else
@@ -296,8 +305,9 @@ function ChooseRoleScene:rotate3Heroes(isRight)
     end
 
     local rotatetime = 0.6
-    if isRight then
-        local middle = self.layer:getChildByTag(sortorder[2])
+    if isRight then--如果是向右滑动
+        local middle = self.layer:getChildByTag(sortorder[2])--2号是中间的hero， 移动到右边去
+        
         middle:runAction(cc.Sequence:create(
             cc.CallFunc:create(function() isMoving = true end), 
             cc.Spawn:create(
@@ -307,16 +317,20 @@ function ChooseRoleScene:rotate3Heroes(isRight)
                 isMoving = false
                 self:playAudioWhenRotate()
             end)))
-        local left = self.layer:getChildByTag(sortorder[1])
+        
+        local left = self.layer:getChildByTag(sortorder[1])--1号是左边的hero， 移动到中间来
         left:runAction(cc.EaseCircleActionInOut:create(cc.MoveTo:create(rotatetime,pos[2])))
-        local right = self.layer:getChildByTag(sortorder[3])
+        
+        local right = self.layer:getChildByTag(sortorder[3])--3号是右边的hero， 移动到左边去
         right:runAction(cc.EaseCircleActionInOut:create(cc.MoveTo:create(rotatetime,pos[1])))
+        --移动后重新调整sortorder中的对象顺序
         local t = sortorder[3]
         sortorder[3]=sortorder[2]
         sortorder[2]=sortorder[1]
         sortorder[1]=t
     else
-        local middle = self.layer:getChildByTag(sortorder[2])
+        local middle = self.layer:getChildByTag(sortorder[2])--2号是中间的hero， 移动到左边去
+        --滑动动画
         middle:runAction(cc.Sequence:create(
             cc.CallFunc:create(function() 
                 isMoving = true
@@ -328,21 +342,26 @@ function ChooseRoleScene:rotate3Heroes(isRight)
                 isMoving = false 
                 self:playAudioWhenRotate()
             end)))
-        local left = self.layer:getChildByTag(sortorder[1])
+            
+        local left = self.layer:getChildByTag(sortorder[1])--1号是左边的，移动到右边去
         left:runAction(cc.EaseCircleActionInOut:create(cc.MoveTo:create(rotatetime,pos[3])))
-        local right = self.layer:getChildByTag(sortorder[3])
+        
+        local right = self.layer:getChildByTag(sortorder[3])--3号是右边的，移动到中间来
         right:runAction(cc.EaseCircleActionInOut:create(cc.MoveTo:create(rotatetime,pos[2])))
+        --重新调整sortorder中英雄的顺序
         local t = sortorder[1]
         sortorder[1]=sortorder[2]
         sortorder[2]=sortorder[3]
         sortorder[3]=t
     end
-
+    --移动的时候同时切换纹理和文字
     self:switchItemtextureWhenRotate()
     self:switchTextWhenRotate()
 end
 
+--得到另一种武器的纹理
 function ChooseRoleScene:getWeaponTextureName()
+    --获取中间位置的英雄
     local hero = self.layer:getChildByTag(sortorder[2])
     if hero._name == "Knight" then --warriors
         if hero:getWeaponID() == 0 then
@@ -365,6 +384,7 @@ function ChooseRoleScene:getWeaponTextureName()
     end
 end
 
+--得到另一种护甲的纹理
 function ChooseRoleScene:getArmourTextureName()
     local hero = self.layer:getChildByTag(sortorder[2])
     if hero._name == "Knight" then --warriors
@@ -388,6 +408,7 @@ function ChooseRoleScene:getArmourTextureName()
     end
 end
 
+--得到另一种头盔的纹理
 function ChooseRoleScene:getHelmetTextureName()
     local hero = self.layer:getChildByTag(sortorder[2])
     if hero._name == "Knight" then --warriors
@@ -412,7 +433,7 @@ function ChooseRoleScene:getHelmetTextureName()
 end
 
 function ChooseRoleScene:switchItemtextureWhenRotate()
-	local hero = self.layer:getChildByTag(sortorder[2])
+	local hero = self.layer:getChildByTag(sortorder[2])--获取中间的hero
 	local xxx = sortorder[2]
 	local weaponTexture
 	local armourTexture
@@ -472,11 +493,13 @@ function ChooseRoleScene:switchItemtextureWhenRotate()
             helmetTexture = "mage_h_0.png"
         end
     end
+    --用新的纹理去替换
 	self._weaponItem:setSpriteFrame(weaponTexture)
     self._armourItem:setSpriteFrame(armourTexture)
     self._helmetItem:setSpriteFrame(helmetTexture)
 end
 
+--切换英雄信息展示，text
 function ChooseRoleScene:switchTextWhenRotate()
     --get hero type
     local hero = self.layer:getChildByTag(sortorder[2])
@@ -485,10 +508,12 @@ function ChooseRoleScene:switchTextWhenRotate()
     local bag = self._bag
     local size = bag:getContentSize()
     local actor = bag:getChildByTag(101)
+    
     if actor ~= nil then
         bag:removeChildByTag(101)
         bag:removeChildByTag(102)
     end
+    
     --actor point
     local point = 0
     
@@ -501,11 +526,14 @@ function ChooseRoleScene:switchTextWhenRotate()
     if hero._name == "Knight" then --warriors
         actor = cc.Sprite:createWithSpriteFrameName("knight.png")
         point = cc.p(size.width*0.395,size.height*0.9)
+        --英雄属性展示
         attr = "23".."\n"..KnightValues._normalAttack.damage.."\n"..KnightValues._hp.."\n"..KnightValues._defense.."\n"..(KnightValues._AIFrequency*100).."\n"..KnightValues._specialAttack.damage.."\n"..KnightValues._specialAttack.damage
+        
     elseif hero._name == "Archer" then --archer
         actor = cc.Sprite:createWithSpriteFrameName("archer.png")
         point = cc.p(size.width*0.4,size.height*0.905)
         attr = "23".."\n"..ArcherValues._normalAttack.damage.."\n"..ArcherValues._hp.."\n"..ArcherValues._defense.."\n"..(ArcherValues._AIFrequency*100).."\n"..ArcherValues._specialAttack.damage.."\n"..ArcherValues._specialAttack.damage
+        
     elseif hero._name == "Mage" then --sorceress
         actor = cc.Sprite:createWithSpriteFrameName("mage.png")
         point = cc.p(size.width*0.38,size.height*0.9)
@@ -514,13 +542,16 @@ function ChooseRoleScene:switchTextWhenRotate()
     
     --add to bag
     actor:setPosition(point)
-    local text_label = cc.Label:createWithTTF(ttfconfig,text,cc.TEXT_ALIGNMENT_CENTER,400)
+    --属性的名字，左边一列
+    local text_label = cc.Label:createWithTTF(ttfconfig,text,cc.TEXT_ALIGNMENT_LEFT,400)
     text_label:setPosition(cc.p(size.width*0.45,size.height*0.68))
     text_label:enableShadow(cc.c4b(92,50,31,255),cc.size(1,-2),0)
     
-    local attr_label = cc.Label:createWithTTF(ttfconfig,attr,cc.TEXT_ALIGNMENT_CENTER,400)
+    --就是那些数字， 右边一列
+    local attr_label = cc.Label:createWithTTF(ttfconfig,attr,cc.TEXT_ALIGNMENT_RIGHT,400)
     attr_label:setPosition(cc.p(size.width*0.65,size.height*0.68))
     attr_label:enableShadow(cc.c4b(92,50,31,255),cc.size(1,-2),0)
+    
     bag:addChild(actor,1,101)
     bag:addChild(text_label,1)
     bag:addChild(attr_label,1,102)
