@@ -8,6 +8,8 @@ function HPCounter:create()
     return HPCounter.new()
 end
 
+--显示扣血的数值和背景，以及慢慢消失的效果
+--参数：[1]伤害值，[2]受伤的角色类型，[3]暴击，致命一击(加个背景图片)
 function HPCounter:showBloodLossNum(damage,actor,attack)
     local time = 1
     local function getRandomXYZ()
@@ -22,7 +24,7 @@ function HPCounter:showBloodLossNum(damage,actor,attack)
         local tm = 0.5
         local pointZ = 50
         
-        local effect = cc.BillBoard:create()
+        local effect = cc.BillBoard:create() --bill board是什么东西？？某种sprite
         local ttfconfig = {outlineSize=7,fontSize=50,fontFilePath="fonts/britanic bold.ttf"}
         local blood = cc.Label:createWithTTF(ttfconfig,"-"..num,cc.TEXT_ALIGNMENT_CENTER,400)
         blood:enableOutline(cc.c4b(0,0,0,255))
@@ -31,13 +33,13 @@ function HPCounter:showBloodLossNum(damage,actor,attack)
         
         local targetScale = 0.6
         if num > 1000 then 
-            blood:setColor(cc.c3b(254,58,19))
+            blood:setColor(cc.c3b(254,58,19))--低伤害显示的颜色
         elseif num > 300 then
             targetScale = 0.45
-            blood:setColor(cc.c3b(255,247,153))
+            blood:setColor(cc.c3b(255,247,153))--中等伤害的颜色
         else
             targetScale = 0.55
-            blood:setColor(cc.c3b(189,0,0))
+            blood:setColor(cc.c3b(189,0,0)) --伤害太高的显示红色
         end
         
         if actor._racetype ~= EnumRaceType.MONSTER then

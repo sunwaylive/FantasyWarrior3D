@@ -157,9 +157,9 @@ KnightValues = {
     _mass           = 1000,
     _shadowSize     = 70,
     
-    _hp             = 1850,
+    _hp             = 18500,
     _maxhp          = 18500,
-    _defense        = 1800,
+    _defense        = 18000,
     _attackFrequency = 2.2,
     _recoverTime    = 0.4,
     _AIFrequency    = 1.1,
@@ -176,7 +176,7 @@ KnightValues = {
         mask     = EnumRaceType.HERO,
         duration = 0,
         speed    = 0,
-        criticalChance = 0.15
+        criticalChance = 0.85
     }, 
     _specialAttack   = {
         minRange = 0,

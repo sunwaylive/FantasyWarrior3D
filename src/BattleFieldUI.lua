@@ -20,14 +20,18 @@ function BattlefieldUI:ctor()
     AUDIO_ID.BATTLEFIELDBGM = ccexp.AudioEngine:play2d(BGM_RES.BATTLEFIELDBGM, true,0.6)
 end
 
+--添加头像到UI层
 function BattlefieldUI:avatarInit()
 
     local offset = 8
     local scale =0.7
+    --全局变量G, 在GlobalVariables.lua中定义
+    --方块头像
     self.MagePng = cc.Sprite:createWithSpriteFrameName("UI-1136-640_18.png")
-    self.MagePng:setPosition3D(cc.V3(1070/1136*G.winSize.width,70/640*G.winSize.height,2))
+    self.MagePng:setPosition3D(cc.V3(1070/1136 * G.winSize.width,70/640 * G.winSize.height,2))
     self.MagePng:setScale(scale)    
     self:addChild(self.MagePng,2)
+    --方块头像的边框
     self.MagePngFrame = cc.Sprite:createWithSpriteFrameName("UI-2.png")
     self.MagePngFrame:setScale(scale)
     self.MagePngFrame:setPosition3D(cc.V3(self.MagePng:getPositionX()+1,self.MagePng:getPositionY()-offset,1))
@@ -50,14 +54,15 @@ function BattlefieldUI:avatarInit()
     self.ArcherPngFrame:setScale(scale)
     self.ArcherPngFrame:setPosition3D(cc.V3(self.ArcherPng:getPositionX()+1,self.ArcherPng:getPositionY()-offset,1))
     self:addChild(self.ArcherPngFrame,1)
-    
-
+    --因为 BattlefieldUI 已经在BattleScene中 作为一个整体添加到了nearPlane前面，所以这个z值只用是一个相对值；
+    --从右手系来看，摄像机正对着xy平面， z越大，会越靠前；
 end
 
+--实现一个血条
 function BattlefieldUI:bloodbarInit()
-
     local offset = 45
     local scale = 0.7
+    --用进度条实现血条
     self.KnightBlood = cc.ProgressTimer:create(cc.Sprite:createWithSpriteFrameName("UI-1136-640_36_clone.png"))
     self.KnightBlood:setColor(cc.c3b(149,254,26))
     self.KnightBlood:setType(cc.PROGRESS_TIMER_TYPE_BAR)
@@ -245,6 +250,7 @@ end
 
 local scheduleID = nil
 
+--掉血的时候，轻微抖动头像
 function BattlefieldUI:shakeAvatar()
     return cc.Repeat:create(cc.Spawn:create(cc.Sequence:create(cc.ScaleTo:create(0.075,0.75),
                                             cc.ScaleTo:create(0.075,0.7)),
@@ -253,8 +259,9 @@ function BattlefieldUI:shakeAvatar()
                                             cc.MoveBy:create(0.05,{x=6.5,y=0}))),2)
 end
 
+--掉血动画
 function BattlefieldUI:bloodDrop(heroActor)
-    local progressTo
+    local progressTo --用来调整进度条实现掉血
     local progressToClone
     local tintTo
     local percent = heroActor._hp/heroActor._maxhp*100
@@ -263,14 +270,14 @@ function BattlefieldUI:bloodDrop(heroActor)
     heroActor._avatar:runAction(BattlefieldUI:shakeAvatar())
     
     if heroActor._hp > 0 and percent>50 then
-
-        progressTo = cc.ProgressTo:create(0.3,percent)
+        --这里可以发现一个额外的实现细节：血条分了两层，前面是绿色的 _bloodBar 后面是红色的 _bloodBarClone。
+        --扣血的速度分别为0.3秒和1秒，这样就呈现了“延迟扣血”的效果。
+        progressTo = cc.ProgressTo:create(0.3,percent) --利用progressTo掉血
         progressToClone = cc.ProgressTo:create(1,percent)
         heroActor._bloodBar:runAction(progressTo)
         heroActor._bloodBarClone:runAction(progressToClone)
         
     elseif heroActor._hp>0 and percent <=50 then
-        
         progressTo = cc.ProgressTo:create(0.3,percent)
         progressToClone = cc.ProgressTo:create(1,percent) 
         tintTo = cc.TintTo:create(0.5,254,225,26)   
@@ -278,7 +285,6 @@ function BattlefieldUI:bloodDrop(heroActor)
         heroActor._bloodBar:runAction(cc.Spawn:create(progressTo,tintTo))
         heroActor._bloodBarClone:runAction(progressToClone)
     elseif heroActor._hp>0 and percent <=30 then
-
         progressTo = cc.ProgressTo:create(0.3,percent)
         progressToClone = cc.ProgressTo:create(1,percent) 
         
@@ -294,22 +300,25 @@ function BattlefieldUI:bloodDrop(heroActor)
     end
 end
 
-
+--英雄死亡函数
 function BattlefieldUI:heroDead(hero)
-
+    --给头像加上了灰色的shader效果，具体实现见 GreyShader.cpp
     if hero._name =="Knight" then
-        cc.GreyShader:setGreyShader(self.KnightPng)
-        cc.GreyShader:setGreyShader(self.KnightPngFrame)    
+        cc.GreyShader:setGreyShader(self.KnightPng) --头像
+        cc.GreyShader:setGreyShader(self.KnightPngFrame) --边框
+        
         self.KnightAngryFullSignal:setVisible(false)   
         self.KnightAngryClone:setVisible(false)
     elseif hero._name =="Mage" then
         cc.GreyShader:setGreyShader(self.MagePng)
         cc.GreyShader:setGreyShader(self.MagePngFrame)
+        
         self.MageAngryFullSignal:setVisible(false)
         self.MageAngryClone:setVisible(false)
     elseif hero._name=="Archer" then
         cc.GreyShader:setGreyShader(self.ArcherPng)
         cc.GreyShader:setGreyShader(self.ArcherPngFrame)
+        
         self.ArcherAngryFullSignal:setVisible(false)
         self.ArcherAngryClone:setVisible(false)                
     end
