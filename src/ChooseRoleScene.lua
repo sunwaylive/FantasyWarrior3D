@@ -184,41 +184,53 @@ function ChooseRoleScene:createLayer()
     return self.layer
 end
 
---touch relative
+--分发触屏事件
 function ChooseRoleScene:initTouchDispatcher()
     local isRotateavaliable = false
     local isWeaponItemavaliable = false
     local isArmourItemavaliable = false
     local isHelmetItemavaliable = false
     local touchbeginPt
+    --初始化监听对象
     local listenner = cc.EventListenerTouchOneByOne:create()
     listenner:setSwallowTouches(true)
+    --注册监听函数
     listenner:registerScriptHandler(function(touch, event)
+        --获取点击的位置
         touchbeginPt = touch:getLocation()
+        --如果点击到英雄，则旋转英雄
         if cc.rectContainsPoint(heroSize,touchbeginPt) then --rotate
             isRotateavaliable = true
             return true
         end
-        touchbeginPt = self._bag:convertToNodeSpace(touchbeginPt)
-        if cc.rectContainsPoint(self._weaponItem:getBoundingBox(),touchbeginPt) then --weapon
+        --判断是否点到背包里面的装备
+        touchbeginPt = self._bag:convertToNodeSpace(touchbeginPt) --需要将点击坐标转换到相对背包位置
+                                    
+        if cc.rectContainsPoint(self._weaponItem:getBoundingBox(), touchbeginPt) then --如果点到了weapon
             isWeaponItemavaliable = true
+            --点到装备后，放大装备并且透明
             self._weaponItem:setScale(1.7)
             self._weaponItem:setOpacity(150)
-        elseif cc.rectContainsPoint(self._armourItem:getBoundingBox(),touchbeginPt) then --armour
+                                    
+        elseif cc.rectContainsPoint(self._armourItem:getBoundingBox(), touchbeginPt) then --如果点到了armour
             isArmourItemavaliable = true
             self._armourItem:setScale(1.7)
             self._armourItem:setOpacity(150)
-        elseif cc.rectContainsPoint(self._helmetItem:getBoundingBox(),touchbeginPt) then --helmet
+        elseif cc.rectContainsPoint(self._helmetItem:getBoundingBox(), touchbeginPt) then --如果点到了helmet
             isHelmetItemavaliable = true
             self._helmetItem:setScale(1.7)
             self._helmetItem:setOpacity(150)
         end
         
         return true
-    end,cc.Handler.EVENT_TOUCH_BEGAN )
+    end,cc.Handler.EVENT_TOUCH_BEGAN)
+    
+    --处理鼠标按下移动的事件
     listenner:registerScriptHandler(function(touch, event)
+                                    
         if isRotateavaliable == true and isMoving == false then --rotate
             local dist = touch:getLocation().x - touchbeginPt.x
+            --如果滑动距离超过了50，就旋转英雄
             if dist>50 then
                 --right
                 self:rotate3Heroes(true)
@@ -228,8 +240,8 @@ function ChooseRoleScene:initTouchDispatcher()
                 self:rotate3Heroes(false)
                 isRotateavaliable = false
             else
-        
             end
+        --如果是点击了装备，就是is***avaliable的话，就让装备随着鼠标一起移动
         elseif isWeaponItemavaliable then --weapon
             self._weaponItem:setPosition(self._bag:convertToNodeSpace(touch:getLocation()))
         elseif isArmourItemavaliable then --armour
@@ -238,6 +250,8 @@ function ChooseRoleScene:initTouchDispatcher()
             self._helmetItem:setPosition(self._bag:convertToNodeSpace(touch:getLocation()))
         end
     end,cc.Handler.EVENT_TOUCH_MOVED )
+    
+    --松开手之后
     listenner:registerScriptHandler(function(touch, event)
         if isRotateavaliable then --rotate
             isRotateavaliable = false
@@ -245,7 +259,8 @@ function ChooseRoleScene:initTouchDispatcher()
             isWeaponItemavaliable = false
             self._weaponItem:setPosition(weapon_item_pos)
             self._weaponItem:setScale(1)
-            self._weaponItem:setOpacity(255)
+            self._weaponItem:setOpacity(255) --255 完全不透明
+            --根据选中的武器，替换装备
             self.layer:getChildByTag(sortorder[2]):switchWeapon()
             self._weaponItem:setSpriteFrame(self:getWeaponTextureName())
         elseif isArmourItemavaliable then
@@ -253,6 +268,7 @@ function ChooseRoleScene:initTouchDispatcher()
             self._armourItem:setPosition(armour_item_pos)
             self._armourItem:setScale(1)
             self._armourItem:setOpacity(255)
+            --替换护甲
             self.layer:getChildByTag(sortorder[2]):switchArmour()
             self._armourItem:setSpriteFrame(self:getArmourTextureName())
         elseif isHelmetItemavaliable then
@@ -260,10 +276,13 @@ function ChooseRoleScene:initTouchDispatcher()
             self._helmetItem:setPosition(helmet_item_pos)
             self._helmetItem:setScale(1)
             self._helmetItem:setOpacity(255)
+            --替换头盔
             self.layer:getChildByTag(sortorder[2]):switchHelmet()
             self._helmetItem:setSpriteFrame(self:getHelmetTextureName())
         end
     end,cc.Handler.EVENT_TOUCH_ENDED )
+    
+    --注册监听事件
     local eventDispatcher = self.layer:getEventDispatcher()
     eventDispatcher:addEventListenerWithSceneGraphPriority(listenner, self.layer)
 end

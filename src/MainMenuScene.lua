@@ -241,7 +241,7 @@ function MainMenuScene:addButton(layer)
     button:setPosition(self.size.width*0.5,self.size.height*0.15)
     button:addTouchEventListener(button_callback)
     layer:addChild(button,4)
-    
+    --法相贴图实现凹凸效果
     local effectNormalMapped = cc.EffectNormalMapped:create("mainmenuscene/start_normal.png")
     effectNormalMapped:setPointLight(self._pointLight)
     effectNormalMapped:setKBump(100)
