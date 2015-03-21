@@ -109,13 +109,14 @@ function collisionDetect(dt)
     end           
 end
 
+--获取英雄的平均位置， 在battle scene中被调用
 function getFocusPointOfHeros()
     local ptFocus ={x=0, y=0}
     for var = HeroManager.last, HeroManager.first, -1 do
-        ptFocus.x=ptFocus.x+HeroManager[var]:getPositionX()
-        ptFocus.y=ptFocus.y+HeroManager[var]:getPositionY()
+        ptFocus.x = ptFocus.x + HeroManager[var]:getPositionX()
+        ptFocus.y = ptFocus.y + HeroManager[var]:getPositionY()
     end
-    ptFocus.x = ptFocus.x/List.getSize(HeroManager)
-    ptFocus.y = ptFocus.y/List.getSize(HeroManager)
+    ptFocus.x = ptFocus.x / List.getSize(HeroManager)
+    ptFocus.y = ptFocus.y / List.getSize(HeroManager)
     return ptFocus
 end

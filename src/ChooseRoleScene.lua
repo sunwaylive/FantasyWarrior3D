@@ -146,14 +146,14 @@ function ChooseRoleScene:addHeros()
     mage:setScale(1.3)
     self.layer:addChild(mage)
     
-    --hero rotate, 旋转英雄
+    --hero rotate, 旋转中间的英雄
     --setRotation3D，开启一个schedule每次旋转了0.5个弧度
     local rotate = 0.5
     local function hero_rotate()
         local rotation = self.layer:getChildByTag(sortorder[2]):getRotation3D()
         self.layer:getChildByTag(sortorder[2]):setRotation3D({x = rotation.x, y = rotation.y + rotate, z=0})
     end
-    --设置调度器每帧都执行
+    --设置调度器，每帧都执行
     self._schedule_rotate = cc.Director:getInstance():getScheduler():scheduleScriptFunc(hero_rotate,0,false)
 end
 
