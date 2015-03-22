@@ -27,33 +27,39 @@ function BattlefieldUI:avatarInit()
     local scale =0.7
     --全局变量G, 在GlobalVariables.lua中定义
     --方块头像
-    self.MagePng = cc.Sprite:createWithSpriteFrameName("UI-1136-640_18.png")
-    self.MagePng:setPosition3D(cc.V3(1070/1136 * G.winSize.width,70/640 * G.winSize.height,2))
-    self.MagePng:setScale(scale)    
-    self:addChild(self.MagePng,2)
-    --方块头像的边框
-    self.MagePngFrame = cc.Sprite:createWithSpriteFrameName("UI-2.png")
-    self.MagePngFrame:setScale(scale)
-    self.MagePngFrame:setPosition3D(cc.V3(self.MagePng:getPositionX()+1,self.MagePng:getPositionY()-offset,1))
-    self:addChild(self.MagePngFrame,1)
-    
     self.KnightPng = cc.Sprite:createWithSpriteFrameName("UI-1136-640_03.png")
-    self.KnightPng:setPosition3D(cc.V3(-self.MagePng:getContentSize().width*2 + self.MagePng:getPositionX()+40,70/640*G.winSize.height,2))
+    self.KnightPng:setPosition3D(cc.V3(1070/1136*G.winSize.width,70/640*G.winSize.height,2))
     self.KnightPng:setScale(scale)
-    self:addChild(self.KnightPng,2)           
+    self:addChild(self.KnightPng,2)
+    --方块头像的边框
     self.KnightPngFrame = cc.Sprite:createWithSpriteFrameName("UI-2.png")
     self.KnightPngFrame:setScale(scale)
     self.KnightPngFrame:setPosition3D(cc.V3(self.KnightPng:getPositionX()+1,self.KnightPng:getPositionY()-offset,1))
     self:addChild(self.KnightPngFrame,1)
-     
+
+    --[[
+    self.MagePng = cc.Sprite:createWithSpriteFrameName("UI-1136-640_18.png")
+    self.MagePng:setPosition3D(cc.V3(1070/1136 * G.winSize.width,70/640 * G.winSize.height,2))
+    self.MagePng:setScale(scale)    
+    self:addChild(self.MagePng,2)
+    
+    self.MagePngFrame = cc.Sprite:createWithSpriteFrameName("UI-2.png")
+    self.MagePngFrame:setScale(scale)
+    self.MagePngFrame:setPosition3D(cc.V3(self.MagePng:getPositionX()+1,self.MagePng:getPositionY()-offset,1))
+    self:addChild(self.MagePngFrame,1)
+    --]]
+    --[[
     self.ArcherPng = cc.Sprite:createWithSpriteFrameName("UI-1136-640_11.png")
     self.ArcherPng:setPosition3D(cc.V3(-self.MagePng:getContentSize().width + self.MagePng:getPositionX()+20,70/640*G.winSize.height,2))
     self.ArcherPng:setScale(scale)
     self:addChild(self.ArcherPng,2)
+     
     self.ArcherPngFrame = cc.Sprite:createWithSpriteFrameName("UI-2.png")
     self.ArcherPngFrame:setScale(scale)
     self.ArcherPngFrame:setPosition3D(cc.V3(self.ArcherPng:getPositionX()+1,self.ArcherPng:getPositionY()-offset,1))
     self:addChild(self.ArcherPngFrame,1)
+     --]]
+    
     --因为 BattlefieldUI 已经在BattleScene中 作为一个整体添加到了nearPlane前面，所以这个z值只用是一个相对值；
     --从右手系来看，摄像机正对着xy平面， z越大，会越靠前；
 end
@@ -82,7 +88,8 @@ function BattlefieldUI:bloodbarInit()
     self.KnightBloodClone:setPosition3D(cc.V3(self.KnightPng:getPositionX()-1, self.KnightPng:getPositionY()-offset,3))
     self.KnightBloodClone:setScale(scale)
     self:addChild(self.KnightBloodClone,3)
-        
+    
+    --[[
     self.ArcherBlood = cc.ProgressTimer:create(cc.Sprite:createWithSpriteFrameName("UI-1136-640_36_clone.png"))
     self.ArcherBlood:setColor(cc.c3b(149,254,26))
     self.ArcherBlood:setType(cc.PROGRESS_TIMER_TYPE_BAR)
@@ -122,6 +129,7 @@ function BattlefieldUI:bloodbarInit()
     self.MageBloodClone:setPosition3D(cc.V3(self.MagePng:getPositionX()-1, self.MagePng:getPositionY()-offset,3))
     self.MageBloodClone:setScale(scale)
     self:addChild(self.MageBloodClone,3)
+     --]]
 end
 
 function BattlefieldUI:angrybarInit()
@@ -160,6 +168,7 @@ function BattlefieldUI:angrybarInit()
     self:addChild(self.KnightAngryFullSignal,4)
     self.KnightAngryFullSignal:setVisible(false)
 
+--[[
     self.ArcherAngry = cc.ProgressTimer:create(cc.Sprite:createWithSpriteFrameName("UI-1136-640_36_clone.png"))
     self.ArcherAngry:setColor(yellow)
     self.ArcherAngry:setType(cc.PROGRESS_TIMER_TYPE_BAR)
@@ -215,6 +224,7 @@ function BattlefieldUI:angrybarInit()
     self.MageAngryFullSignal:runAction(action:clone())
     self.MageAngryFullSignal:setScale(1)
     self.MageAngryFullSignal:setVisible(false)
+ --]]
 end
 
 function BattlefieldUI:touchButtonInit()
@@ -309,6 +319,7 @@ function BattlefieldUI:heroDead(hero)
         
         self.KnightAngryFullSignal:setVisible(false)   
         self.KnightAngryClone:setVisible(false)
+    --[[
     elseif hero._name =="Mage" then
         cc.GreyShader:setGreyShader(self.MagePng)
         cc.GreyShader:setGreyShader(self.MagePngFrame)
@@ -320,7 +331,8 @@ function BattlefieldUI:heroDead(hero)
         cc.GreyShader:setGreyShader(self.ArcherPngFrame)
         
         self.ArcherAngryFullSignal:setVisible(false)
-        self.ArcherAngryClone:setVisible(false)                
+        self.ArcherAngryClone:setVisible(false)      
+     --]]
     end
 end
 
