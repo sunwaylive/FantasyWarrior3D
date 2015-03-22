@@ -3,28 +3,31 @@ require "Manager"
 require "GlobalVariables"
 
 AttackManager = List.new()
+
 function solveAttacks(dt)
     for val = AttackManager.last, AttackManager.first, -1 do
         local attack = AttackManager[val]
-        local apos = getPosTable(attack) 
+        local apos = getPosTable(attack)
+        --如果是英雄发出攻击
         if attack.mask == EnumRaceType.HERO then
-            --if heroes attack, then lets check monsters
+            --如果是英雄发出的攻击，则检测所有的怪物
             for mkey = MonsterManager.last, MonsterManager.first, -1 do
-                --check distance first
+                --首先检测距离是否满足
                 local monster = MonsterManager[mkey]
                 local mpos = monster._myPos
                 local dist = cc.pGetDistance(apos, mpos)
+                
                 if dist < (attack.maxRange + monster._radius) and dist > attack.minRange then
-                    --range test passed, now angle test
+                    --在距离满足条件的情况下，检测攻击角度是否满足
                     local angle = radNormalize(cc.pToAngleSelf(cc.pSub(mpos,apos)))
                     local afacing = radNormalize(attack.facing)
-                    
-                    if(afacing + attack.angle/2)>angle and angle > (afacing- attack.angle/2) then
+                    --如果怪物在角色的攻击范围之内，调用onCollide
+                    if(afacing + attack.angle / 2) > angle and angle > (afacing- attack.angle/2) then
                         attack:onCollide(monster)
                     end
                 end
             end
-        elseif attack.mask == EnumRaceType.MONSTER then
+        elseif attack.mask == EnumRaceType.MONSTER then --如果是野怪发出攻击
             --if heroes attack, then lets check monsters
             for hkey = HeroManager.last, HeroManager.first, -1 do
                 --check distance first
@@ -34,41 +37,50 @@ function solveAttacks(dt)
                 if dist < (attack.maxRange + hero._radius) and dist > attack.minRange then
                     --range test passed, now angle test
                     local angle = cc.pToAngleSelf(cc.pSub(hpos,getPosTable(attack)))
+                    --如果是有效攻击，调用onCollide
                     if(attack.facing + attack.angle/2)>angle and angle > (attack.facing- attack.angle/2) then
                         attack:onCollide(hero)
                     end
                 end
             end
         end
-        attack.curDuration = attack.curDuration+dt
+        --根据duration判断超时
+        attack.curDuration = attack.curDuration + dt
         if attack.curDuration > attack.duration then
-            attack:onTimeOut()
+            attack:onTimeOut() --移除攻击单位
             List.remove(AttackManager,val)
         else
-            attack:onUpdate(dt)
+            attack:onUpdate(dt)--根据speed更新位置
         end
     end
 end
 
+--声明基本的碰撞体，作为角色释放的攻击单位
 BasicCollider = class("BasicCollider", function()
     local node = cc.Sprite3D:create()
-    node:setCascadeColorEnabled(true)
+    node:setCascadeColorEnabled(true)--跟随父节点级联变色
     return node
 end)
 
+--构造函数，每个角色的具体参数都在GlobalVariables.lua中配置
 function BasicCollider:ctor()
     self.minRange = 0   --the min radius of the fan
+    --这两个参数就可以决定了一个 "技能的作用区域",可以很方便得实现如"扇形"等攻击区域。这样攻击技能的生效不一定需要BasicCollider和目标“碰撞”才触发,只要敌人站在攻击区域就可以算打到了。
     self.maxRange = 150 --the max radius of the fan
-    self.angle    = 120 --arc of attack, in radians
+    self.angle    = 120 --arc of attack, in radians，攻击角度，非常有用，关系到技能和攻击的作用范围
+    
     self.knock    = 150 --default knock, knocks 150 units 
     self.mask     = 1   --1 is Heroes, 2 is enemy, 3 ??
     self.damage   = 100
     self.facing    = 0 --this is radians
-    self.duration = 0
+    self.duration = 0 --持续时间
     self.curDuration = 0
     self.speed = 0 --traveling speed}
     self.criticalChance = 0
+    --还可以增加一个属性maxTarget，来决定一个技能是单体吸收还是能够穿透目标，作用在多个目标上面。比如dota里 大牛“冲击波” 巫妖的“连环霜冻”等。
 end
+
+
 --callback when the collider has being solved by the attack manager, 
 --make sure you delete it from node tree, if say you have an effect attached to the collider node
 function BasicCollider:onTimeOut()
@@ -89,8 +101,8 @@ function BasicCollider:hurtEffect(target)
     target:addChild(hurtEffect)  
 end
 
+--攻击生效， 播放动画，并调用目标的hurt函数
 function BasicCollider:onCollide(target)
-    
     self:hurtEffect(target)
     self:playHitAudio()    
     target:hurt(self)
@@ -363,6 +375,7 @@ function ArcherNormalAttack:onUpdate(dt)
     local nextPos = cc.pRotateByAngle(cc.pAdd({x=self.speed*dt, y=0},selfPos),selfPos,self.facing)
     self:setPosition(nextPos)
 end
+
 ArcherSpecialAttack = class("ArcherSpecialAttack", function()
     return BasicCollider.new()
 end)

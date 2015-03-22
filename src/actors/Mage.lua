@@ -39,6 +39,7 @@ function Mage:normalAttack()
     MageNormalAttack.create(getPosTable(self), self._curFacing, self._normalAttack, self._target, self)
 end
 
+--法师的特殊攻击，冰墙效果
 function Mage:specialAttack()
     self._specialAttackChance = MageValues._specialAttackChance
     self._angry = ActorCommonValues._angry
@@ -49,15 +50,19 @@ function Mage:specialAttack()
     --get 3 positions
     ccexp.AudioEngine:play2d(MageProperty.specialAttackShout, false,0.5)
     ccexp.AudioEngine:play2d(MageProperty.ice_special, false,1)
+    
     local pos1 = getPosTable(self)
     local pos2 = getPosTable(self)
     local pos3 = getPosTable(self)
-    pos1.x = pos1.x+130
-    pos2.x = pos2.x+330
-    pos3.x = pos3.x+530
+    pos1.x = pos1.x + 130
+    pos2.x = pos2.x + 330
+    pos3.x = pos3.x + 530
+    --pRotateByAngle：返回点以pos1 以self._myPos为旋转轴点，按逆时针方向旋转self._curFacing弧度，这样最终得到三个点，他们在 法师 和目标的连
+    --线上，与法师的距离分别为130 330 530。在这3个点创建了3个MageIceSpikes。
     pos1 = cc.pRotateByAngle(pos1, self._myPos, self._curFacing)
     pos2 = cc.pRotateByAngle(pos2, self._myPos, self._curFacing)
     pos3 = cc.pRotateByAngle(pos3, self._myPos, self._curFacing)
+    
     MageIceSpikes.create(pos1, self._curFacing, self._specialAttack, self)
     local function spike2()
         MageIceSpikes.create(pos2, self._curFacing, self._specialAttack, self)

@@ -15,7 +15,7 @@ local monsterCount = {dragon=1,slime=7,piglet=2,rat = 0} --rat count must be 0.
 local EXIST_MIN_MONSTER = 4
 local scheduleid
 local stage = 0
-local battleSiteX = {-2800,-1800,-800}
+local battleSiteX = {-2800,-1800,-800} --设置了触发地点 和 刷新地点,经过这些地方之后，会刷新怪物
 local frontDistanceWithHeroX = 600
 local backwardDistanceWithHeroX = 800
 local distanceWithHeroX = 150
@@ -37,9 +37,12 @@ function GameMaster.create()
 	return gm
 end
 
+--统一把角色创建好，然后分批放出来
 function GameMaster:init()
 	self:AddHeros()
+    
 	self:addMonsters()
+    
     stage = 0
     math.randomseed(tostring(os.time()):reverse():sub(1, 6))
     for i=1,4 do
@@ -56,8 +59,10 @@ function GameMaster:update(dt)
 	end
 end
 
+--帧循环，主要负责控制英雄前进和小怪的刷新
 function GameMaster:logicUpdate()    
     if stage == 1 then
+        --最小存在怪物数量
         if List.getSize(MonsterManager) < EXIST_MIN_MONSTER then
             math.randomseed(tostring(os.time()):reverse():sub(1, 6))
             for i=1,4 do
@@ -74,6 +79,7 @@ function GameMaster:logicUpdate()
             stage = 3
         end
     elseif stage == 3 then
+        --如果怪物全部被清除了，则让英雄向右走
         if List.getSize(MonsterManager) == 0 then
             for i = HeroManager.first, HeroManager.last do
                 local hero = HeroManager[i]
@@ -146,15 +152,14 @@ function GameMaster:logicUpdate()
         end
     elseif stage == 8 then
         if getFocusPointOfHeros().x > battleSiteX[3] then
-            self:showWarning()
+            self:showWarning() --warning, boss要出来了
             stage = 9
         end
     end
 end
 
---add heros
+--创建英雄
 function GameMaster:AddHeros()
-
 	local knight = Knight:create()
    	knight:setPosition(battleSiteX[1], 10)
     currentLayer:addChild(knight)
