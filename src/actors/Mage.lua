@@ -82,6 +82,7 @@ function Mage:init3D()
     self:setDefaultEqt()
 end
 
+
 -- init Mage animations=============================
 do
     Mage._action = {

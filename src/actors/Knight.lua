@@ -5,6 +5,7 @@ require "AttackCommand"
 
 local file = "model/knight/knight.c3b"
 
+--Knight是在actor创建完成已经后才重新定义了构造函数ctor()，所以不会影响基类ctor()的调用
 Knight = class("Knight", function()
     return require "Actor".create()
 end)
@@ -23,6 +24,7 @@ function Knight:ctor()
     end
 
     self:init3D()
+    --所有的actions都在model/knight/knight.c3b中实现
     self:initActions()
 end
 
@@ -147,7 +149,7 @@ end
 -- init knight animations=============================
 do
     Knight._action = {
-        idle = createAnimation(file,267,283,0.7),
+        idle = createAnimation(file,267,283,0.7), --file在文件开头被定义
         walk = createAnimation(file,227,246,0.7),
         attack1 = createAnimation(file,103,129,0.7),
         attack2 = createAnimation(file,130,154,0.7),
@@ -160,7 +162,7 @@ do
 end
 -- end init knight animations========================
 function Knight:initActions()
-    self._action = Knight._action
+    self._action = Knight._action--action是一个数组
     self._action.effect = self:initAttackEffect()    
 end
 
@@ -255,6 +257,7 @@ end
 function Knight:getHelmetID()
     return self._useHelmetId
 end
+
 function Knight:hurt(collider, dirKnockMode)
     if self._isalive == true then 
         --TODO add sound effect

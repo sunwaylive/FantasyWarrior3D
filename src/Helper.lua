@@ -171,6 +171,7 @@ function List.removeObj(list, obj)
     end    
 end
 
+--在Actor中被用到
 function copyTable(t1, t2)
     for key, var in pairs(t1) do
         t2[key] = var

@@ -3,7 +3,6 @@ require "AttackCommand"
 --type
 
 
-
 Actor = class ("Actor", function ()
     local node = cc.Sprite3D:create()
     node:setCascadeColorEnabled(true)
@@ -12,6 +11,7 @@ end)
 
 function Actor:ctor()
     self._action = {}
+    --通过拷贝配置来获取自己独立的一套成员变量
     copyTable(ActorDefaultValues,self)
     copyTable(ActorCommonValues, self)
     
@@ -26,16 +26,18 @@ function Actor:ctor()
     end
 end
 
+--给角色添加特效攻击
 function Actor:addEffect(effect)
-    effect:setPosition(cc.pAdd(getPosTable(self),getPosTable(effect)))
-    if self._racetype ~= EnumRaceType.MONSTER then
-        effect:setPositionZ(self:getPositionZ()+self._heroHeight)
-    else
-        effect:setPositionZ(self:getPositionZ()+self._monsterHeight+effect:getPositionZ())
+    effect:setPosition(cc.pAdd(getPosTable(self), getPosTable(effect)))
+    if self._racetype ~= EnumRaceType.MONSTER then --如果不是monster
+        effect:setPositionZ(self:getPositionZ() + self._heroHeight)
+    else                                           --如果是monster
+        effect:setPositionZ(self:getPositionZ() + self._monsterHeight + effect:getPositionZ())
     end
     currentLayer:addChild(effect)
 end
 
+--角色跑起来的烟尘
 function Actor:initPuff()
     local puff = cc.BillboardParticleSystem:create(ParticleManager:getInstance():getPlistData("walkpuff"))
     local puffFrame = cc.SpriteFrameCache:getInstance():getSpriteFrame("walkingPuff.png")
@@ -51,21 +53,25 @@ function Actor.create()
     local base = Actor.new()	
 	return base
 end
+
+--角色的影子,角色属性 _circle 决定影子大小，然后用图片和透明度来实现。
 function Actor:initShadow()
     self._circle = cc.Sprite:createWithSpriteFrameName("shadow.png")
     --use Shadow size for aesthetic, use radius to see collision size
     self._circle:setScale(self._shadowSize/16)
---    self._circle:setScale(self._radius/8)
+    --self._circle:setScale(self._radius/8)
 	self._circle:setOpacity(255*0.7)
 	self:addChild(self._circle)
 end
 
+--由继承者在文件中实现
 function Actor:playAnimation(name, loop)
     if self._curAnimation ~= name then --using name to check which animation is playing
         self._sprite3d:stopAllActions()
         if loop then
             self._curAnimation3d = cc.RepeatForever:create(self._action[name]:clone())
         else
+            --值得注意的是为什么在执行一个动作的时候要使用clone()呢? 因为actor中_action的内容会随着子类对象的创建被重新赋值
             self._curAnimation3d = self._action[name]:clone()
         end
         self._sprite3d:runAction(self._curAnimation3d)
@@ -105,9 +111,11 @@ function Actor:setTarget(target)
         self._target = target
     end
 end
+
+--设置角色的朝向
 function Actor:setFacing(degrees)
-    self._curFacing = DEGREES_TO_RADIANS(degrees)
-    self._targetFacing = self._curFacing
+    self._curFacing = DEGREES_TO_RADIANS(degrees)-- _curFacing：当前朝向，用于攻击的时候提供发射方向
+    self._targetFacing = self._curFacing         -- _targetFacing：正对目标的朝向
     self:setRotation(degrees)
 end
 
@@ -123,7 +131,9 @@ function Actor:hurtSoundEffects()
 -- to override
 end
 
+--攻击者，是带有敲打效果的
 function Actor:hurt(collider, dirKnockMode)
+    --首先自己要活着
     if self._isalive == true then 
         --TODO add sound effect
                     
@@ -131,11 +141,13 @@ function Actor:hurt(collider, dirKnockMode)
         --calculate the real damage
         local critical = false
         local knock = collider.knock
+        --看本次攻击是否暴击
         if math.random() < collider.criticalChance then
-            damage = damage*1.5
+            damage = damage * 1.5
             critical = true
-            knock = knock*2
+            knock = knock * 2
         end
+        --计算伤害
         damage = damage + damage * math.random(-1,1) * 0.15        
         damage = damage - self._defense
         damage = math.floor(damage)
@@ -143,22 +155,18 @@ function Actor:hurt(collider, dirKnockMode)
         if damage <= 0 then
             damage = 1
         end
-        
-
-
         self._hp = self._hp - damage
 
-        
         if self._hp > 0 then
             if collider.knock and damage ~= 1 then
-                self:knockMode(collider, dirKnockMode)
+                self:knockMode(collider, dirKnockMode)--看是否进入knockmode
                 self:hurtSoundEffects()
             else
                 self:hurtSoundEffects()
             end
         else
             self._hp = 0
-            self._isalive = false
+            self._isalive = false --角色死亡，进入dyingMode
             self:dyingMode(getPosTable(collider),knock)        
         end
         
@@ -183,27 +191,33 @@ function Actor:normalAttack()
     BasicCollider.create(self._myPos, self._curFacing, self._normalAttack)
     self:normalAttackSoundEffects()
 end
+
 function Actor:specialAttack()
     BasicCollider.create(self._myPos, self._curFacing, self._specialAttack)
     self:specialAttackSoundEffects()
 end
---======State Machine switching functions
+--======State Machine switching functions, 各种mode其实就是执行一下对应的动画
 function Actor:idleMode() --switch into idle mode
     self:setStateType(EnumStateType.IDLE)
     self:playAnimation("idle", true)
 end
+
 function Actor:walkMode() --switch into walk mode
     self:setStateType(EnumStateType.WALKING)
     self:playAnimation("walk", true)
 end
+
 function Actor:attackMode() --switch into walk mode
     self:setStateType(EnumStateType.ATTACKING)
     self:playAnimation("idle", true)
     self._attackTimer = self._attackFrequency*3/4
 end
+
+--实际上就是做了个位移,位移的距离取决于攻击属性的knock。
 function Actor:knockMode(collider, dirKnockMode)
     self:setStateType(EnumStateType.KNOCKING)
     self:playAnimation("knocked")
+    
     self._timeKnocked = self._aliveTime
     local p = self._myPos
     local angle 
@@ -212,8 +226,9 @@ function Actor:knockMode(collider, dirKnockMode)
     else
         angle = cc.pToAngleSelf(cc.pSub(p, getPosTable(collider)))
     end
-    local newPos = cc.pRotateByAngle(cc.pAdd({x=collider.knock,y=0}, p),p,angle)
-    self:runAction(cc.EaseCubicActionOut:create(cc.MoveTo:create(self._action.knocked:getDuration()*3,newPos)))
+    
+    local newPos = cc.pRotateByAngle(cc.pAdd({x=collider.knock, y=0}, p), p, angle)
+    self:runAction(cc.EaseCubicActionOut:create(cc.MoveTo:create(self._action.knocked:getDuration() * 3, newPos)))
 --    self:setCascadeColorEnabled(true)--if special attack is interrupted then change the value to true      
 end
 
@@ -221,11 +236,15 @@ function Actor:playDyingEffects()
    -- override
 end
 
+--死亡模式
 function Actor:dyingMode(knockSource, knockAmount)
+    --死亡特效
     self:setStateType(EnumStateType.DYING)
     self:playAnimation("dead")
     self:playDyingEffects()
+    
     if self._racetype == EnumRaceType.HERO then
+        --回收对象
         uiLayer:heroDead(self)
         List.removeObj(HeroManager,self) 
         self:runAction(cc.Sequence:create(cc.DelayTime:create(3),cc.MoveBy:create(1.0,cc.V3(0,0,-50)),cc.RemoveSelf:create()))
@@ -233,7 +252,7 @@ function Actor:dyingMode(knockSource, knockAmount)
         self._angry = 0
         local anaryChange = {_name = self._name, _angry = self._angry, _angryMax = self._angryMax}
         MessageDispatchCenter:dispatchMessage(MessageDispatchCenter.MessageType.ANGRY_CHANGE, anaryChange)          
-    else
+    else --可以看到这里有一个3秒后回收到pool的操作
         List.removeObj(MonsterManager,self) 
         local function recycle()
             self:setVisible(false)
@@ -251,8 +270,10 @@ function Actor:dyingMode(knockSource, knockAmount)
     self._AIEnabled = false
 end
 --=======Base Update Functions
+--状态机循环更新，配合Actor:AI()两个函数使用
 function Actor:stateMachineUpdate(dt)
     local state = self:getStateType()
+    --执行相应更新状态的函数
     if state == EnumStateType.WALKING  then
         self:walkUpdate(dt)
     elseif state == EnumStateType.IDLE then
@@ -268,9 +289,9 @@ function Actor:stateMachineUpdate(dt)
         self:knockingUpdate(dt)
     elseif state == EnumStateType.DYING then
         --I am dying.. there is not much i can do right?
-        
     end
 end
+
 function Actor:_findEnemy(HeroOrMonster)
     local shortest = self._searchDistance
     local target = nil
@@ -304,16 +325,20 @@ function Actor:_inRange()
         return (cc.pGetDistance(p1,p2) < attackDistance)
     end
 end
+
 --AI function does not run every tick
+--该函数和stateMachineUpdate共同完成了状态机的正常运转，主要负责根据当前的状态选择下一步行动,并激活状态。
 function Actor:AI()
     if self._isalive then
         local state = self:getStateType()
         local allDead
+        --如果找不到敌人了
         self._target, allDead = self:_findEnemy(self._racetype)
         --if i can find a target
         if self._target then
             local p1 = self._myPos
             local p2 = self._target._myPos
+            --改变自己的朝向
             self._targetFacing =  cc.pToAngleSelf(cc.pSub(p2, p1))
             local isInRange = self:_inRange()
             -- if im (not attacking, or not walking) and my target is not in range
@@ -340,6 +365,10 @@ function Actor:AI()
         -- logic when im dead 
     end
 end
+
+--baseUpdate扶额调用AI()函数，执行频率由GlobalVariables.lua中的 _AIFrequency决定。
+--英雄通常在1~1.3秒，NPC 3~5 秒，因为英雄的逻辑行为更丰富一些。
+--AI计算的频率高可以减少角色傻掉的时间，但是频繁调用又会影响性能，所以要折中考虑。
 function Actor:baseUpdate(dt)
     self._myPos = getPosTable(self)
     self._aliveTime = self._aliveTime+dt
@@ -351,6 +380,7 @@ function Actor:baseUpdate(dt)
         end
     end
 end
+
 function Actor:knockingUpdate(dt)
     if self._aliveTime - self._timeKnocked > self._recoverTime then
         --i have recovered from a knock
@@ -362,6 +392,7 @@ function Actor:knockingUpdate(dt)
         end
     end
 end
+
 function Actor:attackUpdate(dt)   
     self._attackTimer = self._attackTimer + dt
     if self._attackTimer > self._attackFrequency then
@@ -398,6 +429,7 @@ function Actor:attackUpdate(dt)
         end
     end
 end
+
 function Actor:walkUpdate(dt)
     --Walking state, switch to attack state when target in range
     if self._target and self._target._isalive then
@@ -421,15 +453,17 @@ function Actor:walkUpdate(dt)
         end
     end
 end
+
+--该函数在每一帧调用，因为需要频繁调整角色的朝向。
 function Actor:movementUpdate(dt)
-    --Facing
-    if self._curFacing ~= self._targetFacing then
+    --如下这么代码也就是为了判断向左还是向右转：
+    if self._curFacing ~= self._targetFacing then --如果还没有转到目标朝向
         local angleDt = self._curFacing - self._targetFacing
 --            if angleDt >= math.pi then angleDt = angleDt-2*math.pi
 --            elseif angleDt <=-math.pi then angleDt = angleDt+2*math.pi end
-        angleDt = angleDt % (math.pi*2)
-        local turnleft = (angleDt - math.pi)<0
-        local turnby = self._turnSpeed*dt
+        angleDt = angleDt % (math.pi * 2)
+        local turnleft = (angleDt - math.pi) < 0  --检测向左转还是向右转
+        local turnby = self._turnSpeed * dt
         
         --right
         if turnby > angleDt then
@@ -440,21 +474,24 @@ function Actor:movementUpdate(dt)
         --left
             self._curFacing = self._curFacing + turnby
         end
-
+        --更新朝向
         self:setRotation(-RADIANS_TO_DEGREES(self._curFacing))
     end
-    --position update
+    
+    --更新位置，角色属性 _speed 决定最大速度， _acceleration 决定了加速度；
+    --滑行距离也可通过公式计算： S = Vt^2  - Vo^2 / 2a，如果想更精确一点避免“撞上”的话，可以略微调整攻击距离
     if self:getStateType() ~= EnumStateType.WALKING then
         --if I am not walking, i need to slow down
-        self._curSpeed = cc.clampf(self._curSpeed - self._decceleration*dt, 0, self._speed)
+        self._curSpeed = cc.clampf(self._curSpeed - self._decceleration * dt, 0, self._speed)
     elseif self._curSpeed < self._speed then
         --I am in walk mode, if i can speed up, then speed up
         self._curSpeed = cc.clampf(self._curSpeed + self._acceleration*dt, 0, self._speed)
     end
+    
     if self._curSpeed > 0 then
         local p1 = self._myPos
-        local targetPosition = cc.pRotateByAngle(cc.pAdd({x=self._curSpeed*dt,y=0},p1),p1,self._curFacing)
-        self:setPosition(targetPosition)
+        local targetPosition = cc.pRotateByAngle(cc.pAdd({x = self._curSpeed * dt,y = 0}, p1), p1, self._curFacing)
+        self:setPosition(targetPosition) --更新位置
     end
 end
 
