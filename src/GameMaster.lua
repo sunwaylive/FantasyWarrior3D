@@ -166,6 +166,8 @@ function GameMaster:AddHeros()
     knight:idleMode()
     List.pushlast(HeroManager, knight)
 
+    --删除场景中的法师和射手，只留下战士，需要相应的删除左下角的方块头像
+    --[[
     local mage = Mage:create()
    	mage:setPosition(battleSiteX[1], 100)--wei add.100
    	currentLayer:addChild(mage)
@@ -179,6 +181,7 @@ function GameMaster:AddHeros()
     archer:idleMode()
     archer:setVisible(false)--wei add
     List.pushlast(HeroManager, archer)
+    --]]
 end
 
 --add monsters
