@@ -11,7 +11,11 @@ RECTS = {
     fireBall = cc.SpriteFrameCache:getInstance():getSpriteFrame("fireball1.png"):getRect(),
     thunderBall = cc.SpriteFrameCache:getInstance():getSpriteFrame("thunderball.png"):getRect(),
 }
+--这里存放了所有battleUI中用到的图片资源
 cc.SpriteFrameCache:getInstance():addSpriteFrames("battlefieldUI/battleFieldUI.plist")
+--添加joystick的两张图片
+--cc.SpriteFrameCache:getInstance():addSpriteFrames("battlefieldUI/joystick_frame.png")
+--cc.SpriteFrameCache:getInstance():addSpriteFrames("battlefieldUI/joystick_btn.png")
 
 animationCache = cc.AnimationCache:getInstance()
 local hurtAnimation = cc.Animation:create()

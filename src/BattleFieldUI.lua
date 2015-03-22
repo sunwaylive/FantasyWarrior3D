@@ -14,6 +14,7 @@ function BattlefieldUI:ctor()
     self:angrybarInit()
     self:touchButtonInit()
     self:timeInit()
+    self:joystickInit()
 --    self:showVictoryUI()
     
     ccexp.AudioEngine:stopAll()
@@ -441,6 +442,32 @@ function BattlefieldUI:showVictoryUI()
     eventDispatcher:addEventListenerWithSceneGraphPriority(listener,layer)
     
     self:addChild(layer)
+end
+
+--[[
+--方块头像
+self.KnightPng = cc.Sprite:createWithSpriteFrameName("UI-1136-640_03.png")
+self.KnightPng:setPosition3D(cc.V3(1070/1136*G.winSize.width,70/640*G.winSize.height,2))
+self.KnightPng:setScale(scale)
+self:addChild(self.KnightPng,2)
+--方块头像的边框
+self.KnightPngFrame = cc.Sprite:createWithSpriteFrameName("UI-2.png")
+self.KnightPngFrame:setScale(scale)
+self.KnightPngFrame:setPosition3D(cc.V3(self.KnightPng:getPositionX()+1,self.KnightPng:getPositionY()-offset,1))
+self:addChild(self.KnightPngFrame,1)
+--]]
+
+function BattlefieldUI:joystickInit()
+    self.JoystickFrame = cc.Sprite:create("battlefieldUI/joystick_frame.png")
+    --cclog("**************************")
+    self.JoystickFrame:setPosition(self.JoystickFrame:getContentSize().width, self.JoystickFrame:getContentSize().height)
+    self.JoystickFrame:setScale(1.0, 1.0)
+    self:addChild(self.JoystickFrame, 3)
+    
+    self.JoystickBtn = cc.Sprite:create("battlefieldUI/joystick_btn.png")
+    self.JoystickBtn:setPosition(self.JoystickFrame:getContentSize().width, self.JoystickFrame:getContentSize().height)
+    self.JoystickBtn:setScale(1.0, 1.0)
+    self:addChild(self.JoystickBtn, 4)
 end
 
 return BattlefieldUI
