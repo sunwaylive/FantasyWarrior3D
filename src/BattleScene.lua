@@ -5,12 +5,16 @@ require "MessageDispatchCenter"
 currentLayer = nil
 uiLayer = nil
 gameMaster = nil
+
 local specialCamera = {valid = false, position = cc.p(0,0)}
 local size = cc.Director:getInstance():getWinSize()
 local scheduler = cc.Director:getInstance():getScheduler()
 local cameraOffset =  cc.V3(150, 0, 0)
 local cameraOffsetMin = {x=-300, y=-400}
 local cameraOffsetMax = {x=300, y=400}
+local heroMoveDir = cc.p(0, 0)
+local heroMoveSpeed = 200
+
 
 --移动相机
 local function moveCamera(dt)
@@ -40,6 +44,18 @@ local function moveCamera(dt)
     end
 end
 
+local function moveHero(dt)
+    --首先更新角色的朝向
+    for val = HeroManager.last, HeroManager.first , -1 do
+        local sprite = HeroManager[val]
+        sprite._curFacing = heroMoveDir
+        sprite:setStateType(EnumStateType.WALKING)
+        cclog("change curfacing")
+    end
+    
+    return true
+end
+
 --让粒子效果跟随角色移动
 local function updateParticlePos()
     --cclog("updateParticlePos")
@@ -51,7 +67,6 @@ local function updateParticlePos()
     end
 end
 
---
 local function createBackground()
     local spriteBg = cc.Sprite3D:create("model/scene/changing.c3b")
 
@@ -93,6 +108,7 @@ local function gameController(dt)
     collisionDetect(dt)--碰撞检测：由Manager.lua 来维护
     solveAttacks(dt)--伤害计算：由attackCommand来维护
     moveCamera(dt)--移动相机
+    moveHero(dt) --监听角色控制的移动
 end
 
 --初始化UI层
@@ -140,13 +156,17 @@ end
 
 function BattleScene:enableTouch()
     local function onTouchBegin(touch,event)
-        --cclog("onTouchBegin: %0.2f, %0.2f", touch:getLocation())      
+        --根据摇杆，控制英雄行走方向
         if self:UIcontainsPoint(touch:getLocation()) == JOYSTICK then
-            cclog("enable touch joystick")
+            local touchPoint = cc.p(touch:getLocation().x, touch:getLocation().y)--getLocation返回的是table，两个属性x， y
+            local joystickFrameCenter = cc.p(uiLayer.JoystickFrame:getPosition())--getPosition两个返回值的，第一个x， 第二个y
             
+            heroMoveDir = cc.p(touchPoint.x - joystickFrameCenter.x, touchPoint.y - joystickFrameCenter.y)
+            cclog("direc: %.2f, %.2f", heroMoveDir.x, heroMoveDir.y)
         end
         return true
     end
+    
     --玩家滑动改变相机的位置
     local function onTouchMoved(touch,event)
         if self:UIcontainsPoint(touch:getLocation()) == nil then
@@ -154,7 +174,6 @@ function BattleScene:enableTouch()
             --因为是像滑动的反方向，所以是sub。通过pGetClampPoint限制位移的max和min。
             cameraOffset = cc.pGetClampPoint(cc.pSub(cameraOffset, delta),cameraOffsetMin,cameraOffsetMax)
         end
-        
     end
     
     local function onTouchEnded(touch,event)

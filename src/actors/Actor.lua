@@ -381,7 +381,7 @@ function Actor:AI()
     end
 end
 
---baseUpdate扶额调用AI()函数，执行频率由GlobalVariables.lua中的 _AIFrequency决定。
+--baseUpdate负责调用AI()函数，执行频率由GlobalVariables.lua中的 _AIFrequency决定。
 --英雄通常在1~1.3秒，NPC 3~5 秒，因为英雄的逻辑行为更丰富一些。
 --AI计算的频率高可以减少角色傻掉的时间，但是频繁调用又会影响性能，所以要折中考虑。
 function Actor:baseUpdate(dt)
@@ -457,7 +457,7 @@ function Actor:attackUpdate(dt)
 end
 
 function Actor:walkUpdate(dt)
-    --关闭英雄的AI
+    --如果是英雄行走，直接根据摇杆的方向控制英雄路线
     if self._racetype == EnumRaceType.HERO then
         return true
     end
