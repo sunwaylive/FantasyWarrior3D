@@ -405,12 +405,13 @@ function BattlefieldUI:timeInit()
 end
 
 function BattlefieldUI:showVictoryUI()
-    --diable AI
+    --disable AI
 
     --color layer
     local layer = cc.LayerColor:create(cc.c4b(10,10,10,150))
     layer:ignoreAnchorPointForPosition(false)
     layer:setPosition3D(cc.V3(G.winSize.width*0.5,G.winSize.height*0.5,0))
+    
     --add victory
     local victory = cc.Sprite:createWithSpriteFrameName("victory.png")
     victory:setPosition3D(cc.V3(G.winSize.width*0.5,G.winSize.height*0.5,3))
@@ -426,6 +427,7 @@ function BattlefieldUI:showVictoryUI()
     local function onTouchBegan(touch, event)
         return true
     end
+    
     local function onTouchEnded(touch,event)
         --stop schedule
         cc.Director:getInstance():getScheduler():unscheduleScriptEntry(self._tmSchedule)
