@@ -48,7 +48,8 @@ local function moveHero(dt)
     --首先更新角色的朝向
     for val = HeroManager.last, HeroManager.first , -1 do
         local sprite = HeroManager[val]
-        sprite._curFacing = heroMoveDir
+        sprite._curFacing = cc.pToAngleSelf(heroMoveDir)
+        sprite:setRotation(-RADIANS_TO_DEGREES(sprite._curFacing))
         sprite:setStateType(EnumStateType.WALKING)
         cclog("change curfacing")
     end

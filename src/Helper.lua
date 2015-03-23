@@ -186,6 +186,7 @@ end
 function DEGREES_TO_RADIANS(__ANGLE__) 
     return __ANGLE__ * 0.01745329252
 end
+
 function RADIANS_TO_DEGREES(__ANGLE__)
     return __ANGLE__ * 57.29577951
 end
