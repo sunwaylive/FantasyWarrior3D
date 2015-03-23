@@ -48,13 +48,13 @@ local function moveHero(dt)
     --首先更新角色的朝向
     for val = HeroManager.last, HeroManager.first , -1 do
         local sprite = HeroManager[val]
-        sprite._curFacing = cc.pToAngleSelf(heroMoveDir)
+        sprite._curFacing = cc.pToAngleSelf(heroMoveDir) --TODO, normalize
         sprite:setRotation(-RADIANS_TO_DEGREES(sprite._curFacing))
         sprite:setStateType(EnumStateType.WALKING)
         
         local curPos = sprite._myPos
-        cclog("cur pos: %.2f, %.2f", curPos.x, curPos.y)
-        cclog("change curfacing")
+        local newPos = cc.pAdd(curPos, cc.p(heroMoveDir.x * heroMoveSpeed * dt, heroMoveDir.y * heroMoveSpeed * dt))
+        sprite:setPosition(newPos)
     end
     
     return true
@@ -165,9 +165,8 @@ function BattleScene:enableTouch()
             local touchPoint = cc.p(touch:getLocation().x, touch:getLocation().y)--getLocation返回的是table，两个属性x， y
             local joystickFrameCenter = cc.p(uiLayer.JoystickFrame:getPosition())--getPosition两个返回值的，第一个x， 第二个y
             
-            heroMoveDir = cc.p(touchPoint.x - joystickFrameCenter.x, touchPoint.y - joystickFrameCenter.y)
-            heroMoveSpeed = 200
-            cclog("touched direc: %.2f, %.2f", heroMoveDir.x, heroMoveDir.y)
+            heroMoveDir = cc.pNormalize(cc.p(touchPoint.x - joystickFrameCenter.x, touchPoint.y - joystickFrameCenter.y))
+            heroMoveSpeed = 50
         end
         return true
     end
@@ -178,9 +177,8 @@ function BattleScene:enableTouch()
             local touchPoint = cc.p(touch:getLocation().x, touch:getLocation().y)
             local joystickFrameCenter = cc.p(uiLayer.JoystickFrame:getPosition())
             
-            heroMoveDir = cc.p(touchPoint.x - joystickFrameCenter.x, touchPoint.y - joystickFrameCenter.y)
-            heroMoveSpeed = 200
-            cclog("moved direc: %.2f, %.2f", heroMoveDir.x, heroMoveDir.y)
+            heroMoveDir = cc.pNormalize(cc.p(touchPoint.x - joystickFrameCenter.x, touchPoint.y - joystickFrameCenter.y))
+            heroMoveSpeed = 50
         end
         
         --不改变相机的视角
@@ -195,6 +193,7 @@ function BattleScene:enableTouch()
     
     local function onTouchEnded(touch,event)
         --松手之后，让英雄停止移动
+        heroMoveDir = cc.p(0, 0)
         heroMoveSpeed = 0
         
         local location = touch:getLocation()
