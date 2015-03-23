@@ -97,7 +97,7 @@ end
 
 --初始化UI层
 local function initUILayer()
-    --创建战场层
+    --创建战场层, uiLayer就是BattleFieldUI的一个实例
     uiLayer = require("BattleFieldUI").create()
 
     uiLayer:setPositionZ(-1 * cc.Director:getInstance():getZEye()/4)--getZEye获取到近平面的距离
@@ -140,7 +140,11 @@ end
 
 function BattleScene:enableTouch()
     local function onTouchBegin(touch,event)
-        --cclog("onTouchBegin: %0.2f, %0.2f", touch:getLocation())        
+        --cclog("onTouchBegin: %0.2f, %0.2f", touch:getLocation())      
+        if self:UIcontainsPoint(touch:getLocation()) == JOYSTICK then
+            cclog("enable touch joystick")
+            
+        end
         return true
     end
     --玩家滑动改变相机的位置
@@ -150,6 +154,7 @@ function BattleScene:enableTouch()
             --因为是像滑动的反方向，所以是sub。通过pGetClampPoint限制位移的max和min。
             cameraOffset = cc.pGetClampPoint(cc.pSub(cameraOffset, delta),cameraOffsetMin,cameraOffsetMax)
         end
+        
     end
     
     local function onTouchEnded(touch,event)
@@ -191,7 +196,12 @@ function BattleScene:UIcontainsPoint(position)
         message = MessageDispatchCenter.MessageType.SPECIAL_MAGE
      --]]
     end   
-        
+    
+    local rectJoystick = uiLayer.JoystickFrame:getBoundingBox()
+    if cc.rectContainsPoint(rectJoystick, position) then
+        message = MessageDispatchCenter.MessageType.JOYSTICK
+    end
+    
     return message 
 end
 

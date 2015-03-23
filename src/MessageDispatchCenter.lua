@@ -10,6 +10,7 @@ MessageDispatchCenter.MessageType = {
     SPECIAL_ARCHER = "SPECIAL_ARCHER",
     SPECIAL_MAGE = "SPECIAL_MAGE",
     ANGRY_CHANGE = "ANGRY_CHANGE",
+    JOYSTICK = "JOYSTICK"
 }
 
 MessageDispatchCenter.MessageQue = {}
@@ -40,8 +41,10 @@ function MessageDispatchCenter:registerMessage(messageType,callback)
     if self.MessageQue[messageType] == nil then
         self.MessageQue[messageType] = {}
     end
+    
+    --同一个消息可以有不止一种回调函数
     local index = table.getn(self.MessageQue[messageType])
-    self.MessageQue[messageType][index+1] = callback
+    self.MessageQue[messageType][index + 1] = callback
     
 --    for i,v in pairs(self.MessageQue) do
 --        print(table.getn(v))
@@ -52,6 +55,7 @@ function MessageDispatchCenter:registerMessage(messageType,callback)
 --    print("----------------------------")
 end
 
+--dispatch的时候就是调用回调函数的时候
 function MessageDispatchCenter:dispatchMessage(messageType,param)
     --if param is valid
     if self.MessageType[messageType] == nil then
@@ -63,6 +67,7 @@ function MessageDispatchCenter:dispatchMessage(messageType,param)
     if self.MessageQue[messageType] == nil then
         return
     end
+    
     for i,v in pairs(self.MessageQue[messageType]) do
         v(param)
     end
