@@ -196,6 +196,7 @@ function Actor:specialAttack()
     BasicCollider.create(self._myPos, self._curFacing, self._specialAttack)
     self:specialAttackSoundEffects()
 end
+
 --======State Machine switching functions, 各种mode其实就是执行一下对应的动画
 function Actor:idleMode() --switch into idle mode
     self:setStateType(EnumStateType.IDLE)
@@ -210,7 +211,7 @@ end
 function Actor:attackMode() --switch into walk mode
     self:setStateType(EnumStateType.ATTACKING)
     self:playAnimation("idle", true)
-    self._attackTimer = self._attackFrequency*3/4
+    self._attackTimer = self._attackFrequency * 3 / 4
 end
 
 --实际上就是做了个位移,位移的距离取决于攻击属性的knock。
@@ -269,10 +270,12 @@ function Actor:dyingMode(knockSource, knockAmount)
     end
     self._AIEnabled = false
 end
+
 --=======Base Update Functions
 --状态机循环更新，配合Actor:AI()两个函数使用
 function Actor:stateMachineUpdate(dt)
     local state = self:getStateType()
+    
     --执行相应更新状态的函数
     if state == EnumStateType.WALKING  then
         self:walkUpdate(dt)
@@ -292,16 +295,21 @@ function Actor:stateMachineUpdate(dt)
     end
 end
 
+--这里要修改成，只有怪物着英雄，英雄不找怪物
 function Actor:_findEnemy(HeroOrMonster)
     local shortest = self._searchDistance
     local target = nil
     local allDead = true
     local manager = nil
+    
     if HeroOrMonster == EnumRaceType.MONSTER then
         manager = HeroManager
     else
-        manager = MonsterManager
+        --如果参数传进来的是英雄，直接返回空目标，并且allDead 为true，即关闭英雄的AI
+        return nil, true
+        --manager = MonsterManager
     end
+    
     for val = manager.first, manager.last do
         local temp = manager[val]
         local dis = cc.pGetDistance(self._myPos,temp._myPos)
@@ -313,8 +321,10 @@ function Actor:_findEnemy(HeroOrMonster)
             allDead = false
         end
     end
+    
     return target, allDead
 end
+
 function Actor:_inRange()
     if not self._target then
         return false
@@ -329,6 +339,11 @@ end
 --AI function does not run every tick
 --该函数和stateMachineUpdate共同完成了状态机的正常运转，主要负责根据当前的状态选择下一步行动,并激活状态。
 function Actor:AI()
+    --如果是英雄，则不执行任何AI
+    if self._racetype == EnumRaceType.HERO then
+        return true
+    end
+    
     if self._isalive then
         local state = self:getStateType()
         local allDead
@@ -371,17 +386,23 @@ end
 --AI计算的频率高可以减少角色傻掉的时间，但是频繁调用又会影响性能，所以要折中考虑。
 function Actor:baseUpdate(dt)
     self._myPos = getPosTable(self)
-    self._aliveTime = self._aliveTime+dt
+    self._aliveTime = self._aliveTime + dt
+    
     if self._AIEnabled then
-        self._AITimer = self._AITimer+dt
+        self._AITimer = self._AITimer + dt
         if self._AITimer > self._AIFrequency then
-            self._AITimer = self._AITimer-self._AIFrequency
+            self._AITimer = self._AITimer - self._AIFrequency
             self:AI()
         end
     end
 end
 
 function Actor:knockingUpdate(dt)
+    --关闭英雄的AI
+    if self._racetype == EnumRaceType.HERO then
+        return true
+    end
+    
     if self._aliveTime - self._timeKnocked > self._recoverTime then
         --i have recovered from a knock
         self._timeKnocked = nil
@@ -393,7 +414,12 @@ function Actor:knockingUpdate(dt)
     end
 end
 
-function Actor:attackUpdate(dt)   
+function Actor:attackUpdate(dt)
+    --关闭英雄的AI
+    if self._racetype == EnumRaceType.HERO then
+        return true
+    end
+    
     self._attackTimer = self._attackTimer + dt
     if self._attackTimer > self._attackFrequency then
         self._attackTimer = self._attackTimer - self._attackFrequency
@@ -431,6 +457,11 @@ function Actor:attackUpdate(dt)
 end
 
 function Actor:walkUpdate(dt)
+    --关闭英雄的AI
+    if self._racetype == EnumRaceType.HERO then
+        return true
+    end
+    
     --Walking state, switch to attack state when target in range
     if self._target and self._target._isalive then
         local attackDistance = self._attackRange + self._target._radius -1
@@ -456,6 +487,11 @@ end
 
 --该函数在每一帧调用，因为需要频繁调整角色的朝向。
 function Actor:movementUpdate(dt)
+    --关闭英雄的AI
+    if self._racetype == EnumRaceType.HERO then
+        return true
+    end
+    
     --如下这么代码也就是为了判断向左还是向右转：
     if self._curFacing ~= self._targetFacing then --如果还没有转到目标朝向
         local angleDt = self._curFacing - self._targetFacing
