@@ -13,7 +13,7 @@ local cameraOffset =  cc.V3(150, 0, 0)
 local cameraOffsetMin = {x=-300, y=-400}
 local cameraOffsetMax = {x=300, y=400}
 local heroMoveDir = cc.p(0, 0)
-local heroMoveSpeed = 200
+local heroMoveSpeed = 0
 
 
 --移动相机
@@ -51,6 +51,9 @@ local function moveHero(dt)
         sprite._curFacing = cc.pToAngleSelf(heroMoveDir)
         sprite:setRotation(-RADIANS_TO_DEGREES(sprite._curFacing))
         sprite:setStateType(EnumStateType.WALKING)
+        
+        local curPos = sprite._myPos
+        cclog("cur pos: %.2f, %.2f", curPos.x, curPos.y)
         cclog("change curfacing")
     end
     
@@ -163,21 +166,37 @@ function BattleScene:enableTouch()
             local joystickFrameCenter = cc.p(uiLayer.JoystickFrame:getPosition())--getPosition两个返回值的，第一个x， 第二个y
             
             heroMoveDir = cc.p(touchPoint.x - joystickFrameCenter.x, touchPoint.y - joystickFrameCenter.y)
-            cclog("direc: %.2f, %.2f", heroMoveDir.x, heroMoveDir.y)
+            heroMoveSpeed = 200
+            cclog("touched direc: %.2f, %.2f", heroMoveDir.x, heroMoveDir.y)
         end
         return true
     end
     
     --玩家滑动改变相机的位置
     local function onTouchMoved(touch,event)
+        if self:UIcontainsPoint(touch:getLocation()) == JOYSTICK then
+            local touchPoint = cc.p(touch:getLocation().x, touch:getLocation().y)
+            local joystickFrameCenter = cc.p(uiLayer.JoystickFrame:getPosition())
+            
+            heroMoveDir = cc.p(touchPoint.x - joystickFrameCenter.x, touchPoint.y - joystickFrameCenter.y)
+            heroMoveSpeed = 200
+            cclog("moved direc: %.2f, %.2f", heroMoveDir.x, heroMoveDir.y)
+        end
+        
+        --不改变相机的视角
+        --[[
         if self:UIcontainsPoint(touch:getLocation()) == nil then
             local delta = touch:getDelta()
             --因为是像滑动的反方向，所以是sub。通过pGetClampPoint限制位移的max和min。
             cameraOffset = cc.pGetClampPoint(cc.pSub(cameraOffset, delta),cameraOffsetMin,cameraOffsetMax)
         end
+         --]]
     end
     
     local function onTouchEnded(touch,event)
+        --松手之后，让英雄停止移动
+        heroMoveSpeed = 0
+        
         local location = touch:getLocation()
         local message = self:UIcontainsPoint(location)
         if message ~= nil then

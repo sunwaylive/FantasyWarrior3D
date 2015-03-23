@@ -489,7 +489,6 @@ end
 function Actor:movementUpdate(dt)
     --关闭英雄的AI
     if self._racetype == EnumRaceType.HERO then
-        
         return true
     end
     
