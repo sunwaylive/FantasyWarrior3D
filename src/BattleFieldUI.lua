@@ -15,6 +15,7 @@ function BattlefieldUI:ctor()
     self:touchButtonInit()
     self:timeInit()
     self:joystickInit()
+    self:attackBtnInit()
 --    self:showVictoryUI()
     
     ccexp.AudioEngine:stopAll()
@@ -29,7 +30,7 @@ function BattlefieldUI:avatarInit()
     --全局变量G, 在GlobalVariables.lua中定义
     --方块头像
     self.KnightPng = cc.Sprite:createWithSpriteFrameName("UI-1136-640_03.png")
-    self.KnightPng:setPosition3D(cc.V3(1070/1136*G.winSize.width,70/640*G.winSize.height,2))
+    self.KnightPng:setPosition3D(cc.V3(G.winSize.width*0.06,G.winSize.height*0.915,2))
     self.KnightPng:setScale(scale)
     self:addChild(self.KnightPng,2)
     --方块头像的边框
@@ -379,6 +380,7 @@ function BattlefieldUI:timeInit()
     tm_label:setAnchorPoint(0,0)
     tm_label:setPosition3D(cc.V3(G.winSize.width*0.02,G.winSize.height*0.915,2))
     tm_label:enableOutline(cc.c4b(0,0,0,255))
+    tm_label:setVisible(false) --不现实时间
     self._tmlabel = tm_label
     self:addChild(tm_label,5)
     --time update
@@ -459,6 +461,7 @@ self.KnightPngFrame:setPosition3D(cc.V3(self.KnightPng:getPositionX()+1,self.Kni
 self:addChild(self.KnightPngFrame,1)
 --]]
 
+--添加摇杆
 function BattlefieldUI:joystickInit()
     self.JoystickFrame = cc.Sprite:create("battlefieldUI/joystick_frame.png")
     --cclog("**************************")
@@ -470,6 +473,14 @@ function BattlefieldUI:joystickInit()
     self.JoystickBtn:setPosition(self.JoystickFrame:getContentSize().width, self.JoystickFrame:getContentSize().height)
     self.JoystickBtn:setScale(1.0, 1.0)
     self:addChild(self.JoystickBtn, 4)
+end
+
+--添加攻击按钮
+function BattlefieldUI:attackBtnInit()
+    self.attackBtn = cc.Sprite:create("battlefieldUI/attackBtn.png")
+    self.attackBtn:setPosition3D(cc.V3(1070 / 1136 * G.winSize.width, 70 / 640 * G.winSize.height, 2))
+    self.attackBtn:setScale(1.0, 1.0)
+    self:addChild(self.attackBtn, 5)
 end
 
 return BattlefieldUI
