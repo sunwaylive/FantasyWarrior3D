@@ -56,6 +56,16 @@ local function moveHero(dt)
     return true
 end
 
+--每帧都执行
+local function heroAttack(dt)
+    for val = HeroManager.first, HeroManager.last do
+        local sprite = HeroManager[val]
+        if sprite:getStateType() == EnumStateType.ATTACKING then
+            sprite:attackUpdate(dt)
+        end
+    end
+end
+
 --让粒子效果跟随角色移动
 local function updateParticlePos()
     --cclog("updateParticlePos")
@@ -109,6 +119,7 @@ local function gameController(dt)
     solveAttacks(dt)--伤害计算：由attackCommand来维护
     moveCamera(dt)--移动相机
     moveHero(dt) --监听角色控制的移动
+    --heroAttack(dt)--监听英雄攻击
 end
 
 --初始化UI层
@@ -158,6 +169,9 @@ function BattleScene:enableTouch()
     local function onTouchBegin(touch,event)
         --根据摇杆，控制英雄行走方向
         if self:UIcontainsPoint(touch:getLocation()) == "JOYSTICK" then
+            --让摇杆按钮的中心点随点击中心点移动
+            uiLayer.JoystickBtn:setPosition(touch:getLocation())
+            
             local touchPoint = cc.p(touch:getLocation().x, touch:getLocation().y)--getLocation返回的是table，两个属性x， y
             local joystickFrameCenter = cc.p(uiLayer.JoystickFrame:getPosition())--getPosition两个返回值的，第一个x， 第二个y
             
@@ -172,21 +186,22 @@ function BattleScene:enableTouch()
                 end
             end
         elseif self:UIcontainsPoint(touch:getLocation()) == "ATTACKBTN" then
-            cclog("attack !!!!")
+            cclog("Attack!!")
             for val = HeroManager.first, HeroManager.last do
                 local sprite = HeroManager[val]
-
                 if sprite:getStateType() ~= EnumStateType.ATTACKING then
-                    sprite:attackMode()
+                    sprite:setStateType(EnumStateType.ATTACKING)
                 end
             end
         end
         return true
     end
     
-    --玩家滑动改变相机的位置
+    --玩家滑动改变相机的位置 self._weaponItem:setPosition(self._bag:convertToNodeSpace(touch:getLocation()))
     local function onTouchMoved(touch,event)
-        if self:UIcontainsPoint(touch:getLocation()) == JOYSTICK then
+        if self:UIcontainsPoint(touch:getLocation()) == "JOYSTICK" then
+            uiLayer.JoystickBtn:setPosition(touch:getLocation())
+            
             local touchPoint = cc.p(touch:getLocation().x, touch:getLocation().y)
             local joystickFrameCenter = cc.p(uiLayer.JoystickFrame:getPosition())
             
@@ -214,18 +229,27 @@ function BattleScene:enableTouch()
     
     local function onTouchEnded(touch,event)
         --松手之后，让英雄停止移动
-        for val = HeroManager.first, HeroManager.last do
-            local sprite = HeroManager[val]
-            --sprite._heroMoveDir = heroMoveDir --方向不变
-            sprite._heroMoveSpeed = 0 --速度变为0
-            if sprite:getStateType() ~= EnumStateType.IDLE then
-                sprite:idleMode()
-            end
-        end
-        
         local location = touch:getLocation()
         local message = self:UIcontainsPoint(location)
-        if message ~= nil then
+
+        if message == "JOYSTICK" then
+            cclog("joystick touch ended")
+            --恢复按钮
+            uiLayer.JoystickBtn:setPosition(uiLayer.JoystickFrame:getContentSize().width, uiLayer.JoystickFrame:getContentSize().height)
+            
+            for val = HeroManager.first, HeroManager.last do
+                local sprite = HeroManager[val]
+                --sprite._heroMoveDir = heroMoveDir --方向不变
+                sprite._heroMoveSpeed = 0 --速度变为0
+                if sprite:getStateType() ~= EnumStateType.IDLE then
+                    sprite:idleMode()
+                end
+            end
+        elseif message == "ATTACKBTN" then
+            cclog("attack btn touch ended")
+            
+            --do nothing
+        elseif message ~= nil then
             MessageDispatchCenter:dispatchMessage(message, 1)            
         end
     end

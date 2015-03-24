@@ -13,9 +13,6 @@ RECTS = {
 }
 --这里存放了所有battleUI中用到的图片资源
 cc.SpriteFrameCache:getInstance():addSpriteFrames("battlefieldUI/battleFieldUI.plist")
---添加joystick的两张图片
---cc.SpriteFrameCache:getInstance():addSpriteFrames("battlefieldUI/joystick_frame.png")
---cc.SpriteFrameCache:getInstance():addSpriteFrames("battlefieldUI/joystick_btn.png")
 
 animationCache = cc.AnimationCache:getInstance()
 local hurtAnimation = cc.Animation:create()
@@ -23,6 +20,7 @@ for i=1,5 do
     name = "hit"..i..".png"
     hurtAnimation:addSpriteFrame(cc.SpriteFrameCache:getInstance():getSpriteFrame(name))
 end
+
 hurtAnimation:setDelayPerUnit(0.1)
 animationCache:addAnimation(hurtAnimation,"hurtAnimation")
 local fireBallAnim = cc.Animation:create()
@@ -30,6 +28,7 @@ for i=2,5 do
     name = "fireball"..i..".png"
     fireBallAnim:addSpriteFrame(cc.SpriteFrameCache:getInstance():getSpriteFrame(name))
 end
+
 fireBallAnim:setDelayPerUnit(0.1)
 animationCache:addAnimation(fireBallAnim,"fireBallAnim")
 

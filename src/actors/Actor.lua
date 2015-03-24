@@ -69,14 +69,15 @@ end
 
 --由继承者在文件中实现
 function Actor:playAnimation(name, loop)
-    if self._curAnimation ~= name then --using name to check which animation is playing
-        self._sprite3d:stopAllActions()
+    if self._curAnimation ~= name then --当前播放的不是 请求的 动画
+        self._sprite3d:stopAllActions()--停止所有动画
         if loop then
             self._curAnimation3d = cc.RepeatForever:create(self._action[name]:clone())
         else
             --值得注意的是为什么在执行一个动作的时候要使用clone()呢? 因为actor中_action的内容会随着子类对象的创建被重新赋值
             self._curAnimation3d = self._action[name]:clone()
         end
+        --运行动画，并且设置该动画为当前播放动画
         self._sprite3d:runAction(self._curAnimation3d)
         self._curAnimation = name
     end
@@ -417,35 +418,42 @@ function Actor:knockingUpdate(dt)
     end
 end
 
+--
 function Actor:attackUpdate(dt)
     --关闭英雄的AI
-    if self._racetype == EnumRaceType.HERO then
+    --[[if self._racetype == EnumRaceType.HERO then
         return true
     end
+     --]]
     
     self._attackTimer = self._attackTimer + dt
     if self._attackTimer > self._attackFrequency then
+        
         self._attackTimer = self._attackTimer - self._attackFrequency
         local function playIdle()
             self:playAnimation("idle", true)
             self._cooldown = false
         end
-        --time for an attack, which attack should i do?
-        local random_special = math.random()
+    
+        local random_special = math.random() --根据概率，选择是否需要special attack
+        --如果是normal attack
         if random_special > self._specialAttackChance then
             local function createCol()
                 self:normalAttack()
             end
             local attackAction = cc.Sequence:create(self._action.attack1:clone(),cc.CallFunc:create(createCol),self._action.attack2:clone(),cc.CallFunc:create(playIdle))
+            
             self._sprite3d:stopAction(self._curAnimation3d)
             self._sprite3d:runAction(attackAction)
             self._curAnimation = attackAction
             self._cooldown = true
-        else
+            
+        else--如果是special attack
             self:setCascadeColorEnabled(false)--special attack does not change color affected by its parent node    
             local function createCol()        
                 self:specialAttack()
             end
+            
             local messageParam = {speed = 0.2, pos = self._myPos, dur= self._specialSlowTime , target=self}
             --cclog("calf speed:%.2f", messageParam.speed)
             MessageDispatchCenter:dispatchMessage(MessageDispatchCenter.MessageType.SPECIAL_PERSPECTIVE, messageParam)                    	
@@ -462,22 +470,24 @@ end
 function Actor:walkUpdate(dt)
     --如果是英雄行走，直接根据摇杆的方向控制英雄路线
     if self._racetype == EnumRaceType.HERO then
+        --if self:getStateType() == EnumStateType.ATTACKING then
+          --  self:attackMode()
+        --end
         return true
     end
     
-    --Walking state, switch to attack state when target in range
+    --如果有目标并且目标是活着的
     if self._target and self._target._isalive then
         local attackDistance = self._attackRange + self._target._radius -1
         local p1 = self._myPos
         local p2 = self._target._myPos
         self._targetFacing = cc.pToAngleSelf(cc.pSub(p2, p1))
-        --print(RADIANS_TO_DEGREES(self._targetFacing))
+        --距离小于攻击距离
         if cc.pGetDistance(p1,p2) < attackDistance then
-            --we are in range, lets switch to attack state
             self:attackMode()
         end
     else
-        --our hero doesn't have a target, lets move
+        --没有目标的话，向右走活着idle
         --self._target = self:_findEnemy(self._raceType)
         local curx,cury = self:getPosition()
         if self._goRight then

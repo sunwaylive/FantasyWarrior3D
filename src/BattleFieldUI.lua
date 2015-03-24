@@ -466,7 +466,7 @@ function BattlefieldUI:joystickInit()
     self.JoystickFrame = cc.Sprite:create("battlefieldUI/joystick_frame.png")
     --cclog("**************************")
     self.JoystickFrame:setPosition(self.JoystickFrame:getContentSize().width, self.JoystickFrame:getContentSize().height)
-    self.JoystickFrame:setScale(1.0, 1.0)
+    self.JoystickFrame:setScale(1.5, 1.5)
     self:addChild(self.JoystickFrame, 3)
     
     self.JoystickBtn = cc.Sprite:create("battlefieldUI/joystick_btn.png")
@@ -479,7 +479,7 @@ end
 function BattlefieldUI:attackBtnInit()
     self.AttackBtn = cc.Sprite:create("battlefieldUI/attackBtn.png")
     self.AttackBtn:setPosition3D(cc.V3(1070 / 1136 * G.winSize.width, 70 / 640 * G.winSize.height, 2))
-    self.AttackBtn:setScale(1.0, 1.0)
+    self.AttackBtn:setScale(2.0, 2.0)
     self:addChild(self.AttackBtn, 4)
 end
 
