@@ -21,6 +21,9 @@ function Actor:ctor()
     self._effectNode = cc.Node:create()
     self._monsterHeight = 70
     self._heroHeight = 150
+    self._heroMoveSpeed = 0
+    self._heroMoveDir = cc.p(0, 0)
+    
     if uiLayer~=nil then
         currentLayer:addChild(self._effectNode)
     end
@@ -339,7 +342,7 @@ end
 --AI function does not run every tick
 --该函数和stateMachineUpdate共同完成了状态机的正常运转，主要负责根据当前的状态选择下一步行动,并激活状态。
 function Actor:AI()
-    --如果是英雄，则不执行任何AI
+    --如果是英雄，则不执行任何AI, 全部由摇杆控制
     if self._racetype == EnumRaceType.HERO then
         return true
     end

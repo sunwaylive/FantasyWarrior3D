@@ -12,9 +12,6 @@ local scheduler = cc.Director:getInstance():getScheduler()
 local cameraOffset =  cc.V3(150, 0, 0)
 local cameraOffsetMin = {x=-300, y=-400}
 local cameraOffsetMax = {x=300, y=400}
-local heroMoveDir = cc.p(0, 0)
-local heroMoveSpeed = 0
-
 
 --移动相机
 local function moveCamera(dt)
@@ -48,12 +45,11 @@ local function moveHero(dt)
     --首先更新角色的朝向
     for val = HeroManager.last, HeroManager.first , -1 do
         local sprite = HeroManager[val]
-        sprite._curFacing = cc.pToAngleSelf(heroMoveDir) --TODO, normalize
-        sprite:setRotation(-RADIANS_TO_DEGREES(sprite._curFacing))
-        sprite:setStateType(EnumStateType.WALKING)
         
+        sprite._curFacing = cc.pToAngleSelf(sprite._heroMoveDir)
+        sprite:setRotation(-RADIANS_TO_DEGREES(sprite._curFacing))
         local curPos = sprite._myPos
-        local newPos = cc.pAdd(curPos, cc.p(heroMoveDir.x * heroMoveSpeed * dt, heroMoveDir.y * heroMoveSpeed * dt))
+        local newPos = cc.pAdd(curPos, cc.p(sprite._heroMoveDir.x * sprite._heroMoveSpeed * dt, sprite._heroMoveDir.y * sprite._heroMoveSpeed * dt))
         sprite:setPosition(newPos)
     end
     
@@ -165,8 +161,16 @@ function BattleScene:enableTouch()
             local touchPoint = cc.p(touch:getLocation().x, touch:getLocation().y)--getLocation返回的是table，两个属性x， y
             local joystickFrameCenter = cc.p(uiLayer.JoystickFrame:getPosition())--getPosition两个返回值的，第一个x， 第二个y
             
-            heroMoveDir = cc.pNormalize(cc.p(touchPoint.x - joystickFrameCenter.x, touchPoint.y - joystickFrameCenter.y))
-            heroMoveSpeed = 50
+            local heroMoveDir = cc.pNormalize(cc.p(touchPoint.x - joystickFrameCenter.x, touchPoint.y - joystickFrameCenter.y))
+            local heroMoveSpeed = 150
+            for val = HeroManager.first, HeroManager.last do
+                local sprite = HeroManager[val]
+                sprite._heroMoveDir = heroMoveDir
+                sprite._heroMoveSpeed = heroMoveSpeed
+                if sprite:getStateType() ~= EnumStateType.WALKING then
+                    sprite:walkMode()
+                end
+            end
         end
         return true
     end
@@ -177,8 +181,16 @@ function BattleScene:enableTouch()
             local touchPoint = cc.p(touch:getLocation().x, touch:getLocation().y)
             local joystickFrameCenter = cc.p(uiLayer.JoystickFrame:getPosition())
             
-            heroMoveDir = cc.pNormalize(cc.p(touchPoint.x - joystickFrameCenter.x, touchPoint.y - joystickFrameCenter.y))
-            heroMoveSpeed = 50
+            local heroMoveDir = cc.pNormalize(cc.p(touchPoint.x - joystickFrameCenter.x, touchPoint.y - joystickFrameCenter.y))
+            local heroMoveSpeed = 150
+            for val = HeroManager.first, HeroManager.last do
+                local sprite = HeroManager[val]
+                sprite._heroMoveDir = heroMoveDir
+                sprite._heroMoveSpeed = heroMoveSpeed
+                if sprite:getStateType() ~= EnumStateType.WALKING then
+                    sprite:walkMode()
+                end
+            end
         end
         
         --不改变相机的视角
@@ -193,8 +205,14 @@ function BattleScene:enableTouch()
     
     local function onTouchEnded(touch,event)
         --松手之后，让英雄停止移动
-        heroMoveDir = cc.p(0, 0)
-        heroMoveSpeed = 0
+        for val = HeroManager.first, HeroManager.last do
+            local sprite = HeroManager[val]
+            --sprite._heroMoveDir = heroMoveDir --方向不变
+            sprite._heroMoveSpeed = 0 --速度变为0
+            if sprite:getStateType() ~= EnumStateType.IDLE then
+                sprite:idleMode()
+            end
+        end
         
         local location = touch:getLocation()
         local message = self:UIcontainsPoint(location)
