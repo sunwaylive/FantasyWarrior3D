@@ -10,7 +10,8 @@ MessageDispatchCenter.MessageType = {
     SPECIAL_ARCHER = "SPECIAL_ARCHER",
     SPECIAL_MAGE = "SPECIAL_MAGE",
     ANGRY_CHANGE = "ANGRY_CHANGE",
-    JOYSTICK = "JOYSTICK"
+    JOYSTICK = "JOYSTICK",
+    ATTACKBTN = "ATTACKBTN",
 }
 
 MessageDispatchCenter.MessageQue = {}

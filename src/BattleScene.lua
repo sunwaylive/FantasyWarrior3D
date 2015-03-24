@@ -157,7 +157,7 @@ end
 function BattleScene:enableTouch()
     local function onTouchBegin(touch,event)
         --根据摇杆，控制英雄行走方向
-        if self:UIcontainsPoint(touch:getLocation()) == JOYSTICK then
+        if self:UIcontainsPoint(touch:getLocation()) == "JOYSTICK" then
             local touchPoint = cc.p(touch:getLocation().x, touch:getLocation().y)--getLocation返回的是table，两个属性x， y
             local joystickFrameCenter = cc.p(uiLayer.JoystickFrame:getPosition())--getPosition两个返回值的，第一个x， 第二个y
             
@@ -169,6 +169,15 @@ function BattleScene:enableTouch()
                 sprite._heroMoveSpeed = heroMoveSpeed
                 if sprite:getStateType() ~= EnumStateType.WALKING then
                     sprite:walkMode()
+                end
+            end
+        elseif self:UIcontainsPoint(touch:getLocation()) == "ATTACKBTN" then
+            cclog("attack !!!!")
+            for val = HeroManager.first, HeroManager.last do
+                local sprite = HeroManager[val]
+
+                if sprite:getStateType() ~= EnumStateType.ATTACKING then
+                    sprite:attackMode()
                 end
             end
         end
@@ -251,11 +260,16 @@ function BattleScene:UIcontainsPoint(position)
         --cclog("rectMage")
         message = MessageDispatchCenter.MessageType.SPECIAL_MAGE
      --]]
+        return
     end   
     
     local rectJoystick = uiLayer.JoystickFrame:getBoundingBox()
+    local rectAttackBtn = uiLayer.AttackBtn:getBoundingBox()
+    
     if cc.rectContainsPoint(rectJoystick, position) then
         message = MessageDispatchCenter.MessageType.JOYSTICK
+    elseif cc.rectContainsPoint(rectAttackBtn, position) then --到这了都是对的
+        message = MessageDispatchCenter.MessageType.ATTACKBTN
     end
     
     return message 

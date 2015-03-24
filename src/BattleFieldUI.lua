@@ -477,10 +477,10 @@ end
 
 --添加攻击按钮
 function BattlefieldUI:attackBtnInit()
-    self.attackBtn = cc.Sprite:create("battlefieldUI/attackBtn.png")
-    self.attackBtn:setPosition3D(cc.V3(1070 / 1136 * G.winSize.width, 70 / 640 * G.winSize.height, 2))
-    self.attackBtn:setScale(1.0, 1.0)
-    self:addChild(self.attackBtn, 5)
+    self.AttackBtn = cc.Sprite:create("battlefieldUI/attackBtn.png")
+    self.AttackBtn:setPosition3D(cc.V3(1070 / 1136 * G.winSize.width, 70 / 640 * G.winSize.height, 2))
+    self.AttackBtn:setScale(1.0, 1.0)
+    self:addChild(self.AttackBtn, 4)
 end
 
 return BattlefieldUI
