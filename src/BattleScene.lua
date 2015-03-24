@@ -232,11 +232,13 @@ function BattleScene:enableTouch()
         local location = touch:getLocation()
         local message = self:UIcontainsPoint(location)
 
-        if message == "JOYSTICK" then
+        if message == "ATTACKBTN" then
+            cclog("attack btn touch ended")
+        elseif message == "JOYSTICK" then
             cclog("joystick touch ended")
-            --恢复按钮
+            --恢复按钮的位置
             uiLayer.JoystickBtn:setPosition(uiLayer.JoystickFrame:getContentSize().width, uiLayer.JoystickFrame:getContentSize().height)
-            
+        
             for val = HeroManager.first, HeroManager.last do
                 local sprite = HeroManager[val]
                 --sprite._heroMoveDir = heroMoveDir --方向不变
@@ -245,12 +247,20 @@ function BattleScene:enableTouch()
                     sprite:idleMode()
                 end
             end
-        elseif message == "ATTACKBTN" then
-            cclog("attack btn touch ended")
-            
-            --do nothing
         elseif message ~= nil then
-            MessageDispatchCenter:dispatchMessage(message, 1)            
+            MessageDispatchCenter:dispatchMessage(message, 1)
+        elseif message == nil then
+            --nil message
+            --恢复按钮的位置
+            uiLayer.JoystickBtn:setPosition(uiLayer.JoystickFrame:getContentSize().width, uiLayer.JoystickFrame:getContentSize().height)
+            for val = HeroManager.first, HeroManager.last do
+                local sprite = HeroManager[val]
+                --sprite._heroMoveDir = heroMoveDir --方向不变
+                sprite._heroMoveSpeed = 0 --速度变为0
+                if sprite:getStateType() ~= EnumStateType.IDLE then
+                    sprite:idleMode()
+                end
+            end
         end
     end
 
