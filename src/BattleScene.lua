@@ -271,6 +271,23 @@ function BattleScene:enableTouch()
     currentLayer:getEventDispatcher():addEventListenerWithSceneGraphPriority(touchEventListener, currentLayer)        
 end
 
+--添加键盘监听事件
+function BattleScene:enableKeyboard()
+    cclog("enable kyeboard!")
+    local function keyboardPressed(keyCode, event)
+        cclog("key pressed")
+    end
+    
+    local function keyboardReleased(keyCode, event)
+        cclog("key released")
+    end
+    
+    local keyboardEventListener = cc.EventListenerKeyboard:create()
+    keyboardEventListener:registerScriptHandler(keyboardPressed, cc.Handler.EVENT_KEYBOARD_PRESSED)
+    keyboardEventListener:registerScriptHandler(keyboardReleased, cc.Handler.EVENT_KEYBOARD_RELEASED)
+    currentLayer:getEventDispatcher():addEventListenerWithSceneGraphPriority(keyboardEventListener, currentLayer)
+end
+
 --根据点击的位置和怒气值，返回相应的消息
 function BattleScene:UIcontainsPoint(position)
     local message  = nil
@@ -317,7 +334,11 @@ function BattleScene.create()
 
     cc.Texture2D:setDefaultAlphaPixelFormat(cc.TEXTURE2_D_PIXEL_FORMAT_RG_B565)
 
+    --监听触摸事件
     scene:enableTouch()
+    --监听键盘事件
+    scene:enableKeyboard()
+    
     --创建场景
     createBackground()
     
