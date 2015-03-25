@@ -431,6 +431,7 @@ function Actor:attackUpdate(dt)
         
         self._attackTimer = self._attackTimer - self._attackFrequency
         local function playIdle()
+            self:setStateType(EnumStateType.IDLE)--打完一下之后，设置成idle状态，免得一直在攻击
             self:playAnimation("idle", true)
             self._cooldown = false
         end
@@ -441,6 +442,7 @@ function Actor:attackUpdate(dt)
             local function createCol()
                 self:normalAttack()
             end
+            --攻击动画播放的快慢，在每个角色自己的lua文件中被初始化
             local attackAction = cc.Sequence:create(self._action.attack1:clone(),cc.CallFunc:create(createCol),self._action.attack2:clone(),cc.CallFunc:create(playIdle))
             
             self._sprite3d:stopAction(self._curAnimation3d)

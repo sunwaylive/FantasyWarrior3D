@@ -119,7 +119,6 @@ local function gameController(dt)
     solveAttacks(dt)--伤害计算：由attackCommand来维护
     moveCamera(dt)--移动相机
     moveHero(dt) --监听角色控制的移动
-    --heroAttack(dt)--监听英雄攻击
 end
 
 --初始化UI层
@@ -248,6 +247,7 @@ function BattleScene:enableTouch()
                 end
             end
         elseif message ~= nil then
+            --处理其他的消息，如
             MessageDispatchCenter:dispatchMessage(message, 1)
         elseif message == nil then
             --nil message

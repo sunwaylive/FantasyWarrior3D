@@ -56,6 +56,8 @@ function createAnimationStruct(var1, var2, var3)
     local timerange = {begin = var1, ended = var2, speed=var3}
     return timerange
 end
+
+--创建动画
 function createAnimation(file, begin, finish, speed)
 --TODO: we don't need to create the same Animation3D all the time
     local animation3d = cc.Animation3D:create(file)

@@ -149,14 +149,14 @@ end
 -- init knight animations=============================
 do
     Knight._action = {
-        idle = createAnimation(file,267,283,0.7), --file在文件开头被定义
+        idle = createAnimation(file,267,283,1.4), --file在文件开头被定义
         walk = createAnimation(file,227,246,0.7),
-        attack1 = createAnimation(file,103,129,0.7),
-        attack2 = createAnimation(file,130,154,0.7),
+        attack1 = createAnimation(file,103,129,2.4),--最后一个参数是动画播放的速度
+        attack2 = createAnimation(file,130,154,2.4),
         specialattack1 = createAnimation(file,160,190,1),
         specialattack2 = createAnimation(file,191,220,1),
-        defend = createAnimation(file,92,96,0.7),
-        knocked = createAnimation(file,254,260,0.7),
+        defend = createAnimation(file,92,96,1.4),
+        knocked = createAnimation(file,254,260,1.4),
         dead = createAnimation(file,0,77,1)
     }
 end
