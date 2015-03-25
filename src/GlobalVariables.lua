@@ -36,7 +36,7 @@ UIZorder = 2000
 FXZorder = 1999
 CelLine = 0.009
 
-BossTaunt = "How dare you???"
+BossTaunt = "Let's Duel!!"
 
 --G values
 G =
@@ -164,7 +164,7 @@ KnightValues = {
     _maxhp          = 18500,
     _defense        = 18000,
     _attackFrequency = 0.5,
-    _recoverTime    = 0.4,
+    _recoverTime    = 0.1,
     _AIFrequency    = 1.1,
     _attackRange    = 140,
     _specialAttackChance = 0,
@@ -179,20 +179,22 @@ KnightValues = {
         mask     = EnumRaceType.HERO,
         duration = 0,
         speed    = 0,
-        criticalChance = 0.85
-    }, 
+        criticalChance = 0.65
+    },
+    
     _specialAttack   = {
         minRange = 0,
         maxRange = 250,
-        angle    = DEGREES_TO_RADIANS(160),
+        angle    = DEGREES_TO_RADIANS(70),
         knock    = 150,
         damage   = 350000,
         mask     = EnumRaceType.HERO,
         duration = 0,
         speed    = 0,
-        criticalChance = 0.35
+        criticalChance = 0.65
     }, 
 }
+
 MageValues = {
     _racetype       = EnumRaceType.HERO,
     _name           = "Mage",

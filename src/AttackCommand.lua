@@ -67,7 +67,7 @@ function BasicCollider:ctor()
     self.minRange = 0   --the min radius of the fan
     --这两个参数就可以决定了一个 "技能的作用区域",可以很方便得实现如"扇形"等攻击区域。这样攻击技能的生效不一定需要BasicCollider和目标“碰撞”才触发,只要敌人站在攻击区域就可以算打到了。
     self.maxRange = 150 --the max radius of the fan
-    self.angle    = 120 --arc of attack, in radians，攻击角度，非常有用，关系到技能和攻击的作用范围
+    self.angle    = 90 --arc of attack, in radians，攻击角度，非常有用，关系到技能和攻击的作用范围
     
     self.knock    = 150 --default knock, knocks 150 units 
     self.mask     = 1   --1 is Heroes, 2 is enemy, 3 ??

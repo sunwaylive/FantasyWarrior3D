@@ -219,6 +219,7 @@ function Mage.create()
     MessageDispatchCenter:registerMessage(MessageDispatchCenter.MessageType.SPECIAL_MAGE, specialAttack)    
     return ret
 end
+
 function Mage:hurt(collider, dirKnockMode)
     if self._isalive == true then 
         --TODO add sound effect

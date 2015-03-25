@@ -136,6 +136,7 @@ function ChooseRoleScene:addHeros()
     archer:setPosition3D(pos[1])
     archer:setAIEnabled(false)
     archer:setScale(1.3)
+    archer:setVisible(false)--不显示射手
     self.layer:addChild(archer)
 
     local mage = Mage.create()
@@ -144,6 +145,7 @@ function ChooseRoleScene:addHeros()
     mage:setPosition3D(pos[3])
     mage:setAIEnabled(false)
     mage:setScale(1.3)
+    mage:setVisible(false)--不显示法师
     self.layer:addChild(mage)
     
     --hero rotate, 旋转中间的英雄
