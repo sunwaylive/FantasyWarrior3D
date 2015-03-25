@@ -13,6 +13,7 @@ RECTS = {
 }
 --这里存放了所有battleUI中用到的图片资源
 cc.SpriteFrameCache:getInstance():addSpriteFrames("battlefieldUI/battleFieldUI.plist")
+cc.SpriteFrameCache:getInstance():addSpriteFrames("battlefieldUI/JoystickAttackBtn.plist")
 
 animationCache = cc.AnimationCache:getInstance()
 local hurtAnimation = cc.Animation:create()

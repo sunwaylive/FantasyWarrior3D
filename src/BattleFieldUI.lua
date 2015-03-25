@@ -24,7 +24,6 @@ end
 
 --添加头像到UI层
 function BattlefieldUI:avatarInit()
-
     local offset = 8
     local scale =0.7
     --全局变量G, 在GlobalVariables.lua中定义
@@ -230,7 +229,6 @@ function BattlefieldUI:angrybarInit()
 end
 
 function BattlefieldUI:touchButtonInit()
-
     self._setBtn =cc.Sprite:createWithSpriteFrameName("UI-1136-640_06.png")
     self._setBtn:setPosition3D(cc.V3(1093/1136*G.winSize.width,591/640*G.winSize.height,3))
     self._setBtn:setScale(0.8)
@@ -463,24 +461,23 @@ self:addChild(self.KnightPngFrame,1)
 
 --添加摇杆
 function BattlefieldUI:joystickInit()
-    self.JoystickFrame = cc.Sprite:create("battlefieldUI/joystick_frame.png")
-    --cclog("**************************")
-    self.JoystickFrame:setPosition(self.JoystickFrame:getContentSize().width, self.JoystickFrame:getContentSize().height)
+    self.JoystickFrame = cc.Sprite:createWithSpriteFrameName("joystick_frame.png")
+    self.JoystickFrame:setPosition(self.JoystickFrame:getContentSize().width - 30, self.JoystickFrame:getContentSize().height - 30)
     self.JoystickFrame:setScale(1.5, 1.5)
-    self:addChild(self.JoystickFrame, 3)
+    self:addChild(self.JoystickFrame, 1)
     
-    self.JoystickBtn = cc.Sprite:create("battlefieldUI/joystick_btn.png")
-    self.JoystickBtn:setPosition(self.JoystickFrame:getContentSize().width, self.JoystickFrame:getContentSize().height)
+    self.JoystickBtn = cc.Sprite:createWithSpriteFrameName("joystick_btn.png")
+    self.JoystickBtn:setPosition(self.JoystickFrame:getContentSize().width - 30, self.JoystickFrame:getContentSize().height - 30)
     self.JoystickBtn:setScale(1.0, 1.0)
-    self:addChild(self.JoystickBtn, 4)
+    self:addChild(self.JoystickBtn, 2)
 end
 
 --添加攻击按钮
 function BattlefieldUI:attackBtnInit()
-    self.AttackBtn = cc.Sprite:create("battlefieldUI/attackBtn.png")
+    self.AttackBtn = cc.Sprite:createWithSpriteFrameName("attackBtn.png")
     self.AttackBtn:setPosition3D(cc.V3(1070 / 1136 * G.winSize.width, 70 / 640 * G.winSize.height, 2))
     self.AttackBtn:setScale(2.0, 2.0)
-    self:addChild(self.AttackBtn, 4)
+    self:addChild(self.AttackBtn, 1)
 end
 
 return BattlefieldUI

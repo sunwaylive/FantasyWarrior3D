@@ -185,7 +185,6 @@ function BattleScene:enableTouch()
                 end
             end
         elseif self:UIcontainsPoint(touch:getLocation()) == "ATTACKBTN" then
-            cclog("Attack!!")
             for val = HeroManager.first, HeroManager.last do
                 local sprite = HeroManager[val]
                 if sprite:getStateType() ~= EnumStateType.ATTACKING then
@@ -232,11 +231,10 @@ function BattleScene:enableTouch()
         local message = self:UIcontainsPoint(location)
 
         if message == "ATTACKBTN" then
-            cclog("attack btn touch ended")
+            --do nothing
         elseif message == "JOYSTICK" then
-            cclog("joystick touch ended")
             --恢复按钮的位置
-            uiLayer.JoystickBtn:setPosition(uiLayer.JoystickFrame:getContentSize().width, uiLayer.JoystickFrame:getContentSize().height)
+            uiLayer.JoystickBtn:setPosition(uiLayer.JoystickFrame:getContentSize().width - 30, uiLayer.JoystickFrame:getContentSize().height - 30)
         
             for val = HeroManager.first, HeroManager.last do
                 local sprite = HeroManager[val]
@@ -252,7 +250,7 @@ function BattleScene:enableTouch()
         elseif message == nil then
             --nil message
             --恢复按钮的位置
-            uiLayer.JoystickBtn:setPosition(uiLayer.JoystickFrame:getContentSize().width, uiLayer.JoystickFrame:getContentSize().height)
+            uiLayer.JoystickBtn:setPosition(uiLayer.JoystickFrame:getContentSize().width - 30, uiLayer.JoystickFrame:getContentSize().height - 30)
             for val = HeroManager.first, HeroManager.last do
                 local sprite = HeroManager[val]
                 --sprite._heroMoveDir = heroMoveDir --方向不变
