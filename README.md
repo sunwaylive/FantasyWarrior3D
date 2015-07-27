@@ -1,5 +1,13 @@
 FantasyWarrior3D
 ================
+First：
+Build on Mac
+1. clone the repo
+2. download cocos2d-x-3.4, then copy all contents in cocos2d-x-3.4 to FatasyWarrior3D/frameworks/cocos2d-x
+3. then build, done!
+
+Second:
+Introduction
 
 FantasyWarrior is a showcase project using Cocos2d-x 3.4
 
